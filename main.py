@@ -172,36 +172,36 @@ def explode_bomb(x, y):
     global canvas, player_x, player_y, lives
 
     def perform_explosion():
-        global lives  # Ajout de cette ligne pour accéder à lives
-        # Rayon d'explosion
+        global lives, score  # Ajout de score aux variables globales
         explosion_range = 3
 
         # Affecte les cases verticalement
         for dy in range(-explosion_range, explosion_range + 1):
             ny = y + dy
             if 0 <= ny < len(map_grid):
-                if map_grid[ny][x] != "C":  # Évite les blocs indestructibles
+                if map_grid[ny][x] != "C":  
+                    if map_grid[ny][x] == "M":  # Si c'est un mur
+                        score += 1  # Incrémente le score
                     map_grid[ny][x] = "X"
-                    if ny == player_y and x == player_x:  # Vérifie si le joueur est touché
+                    if ny == player_y and x == player_x:
                         lives -= 1
                 else:
-                    break  # Stoppe l'explosion dans cette direction
+                    break
 
         # Affecte les cases horizontalement
         for dx in range(-explosion_range, explosion_range + 1):
             nx = x + dx
             if 0 <= nx < len(map_grid[0]):
-                if map_grid[y][nx] != "C":  # Évite les blocs indestructibles
+                if map_grid[y][nx] != "C":
+                    if map_grid[y][nx] == "M":  # Si c'est un mur
+                        score += 1  # Incrémente le score
                     map_grid[y][nx] = "X"
-                    if y == player_y and nx == player_x:  # Vérifie si le joueur est touché
+                    if y == player_y and nx == player_x:
                         lives -= 1
                 else:
-                    break  # Stoppe l'explosion dans cette direction
+                    break
 
         # Effacer la bombe
-        map_grid[y][x] = " "
-
-        # Met à jour l'affichage
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
