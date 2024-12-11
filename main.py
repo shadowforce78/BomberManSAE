@@ -105,6 +105,7 @@ def move_player(event):
         and 0 <= new_y < len(map_grid)
         and map_grid[new_y][new_x] != "C"
         and map_grid[new_y][new_x] != "M"
+        and map_grid[new_y][new_x] != "E"
     ):
 
         # Effacer l'ancienne position
