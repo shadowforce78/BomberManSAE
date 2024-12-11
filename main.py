@@ -39,11 +39,15 @@ map_grid = [list(row) for row in map_data]
 
 TITLE = "Bomberman"
 WIDTH = 675
-HEIGHT = 650
+HEIGHT = 750
 
 # Variables globales pour la position du joueur
 player_x = 0
 player_y = 0
+
+# Nouvelles variables globales pour l'ATH
+lives = 3
+score = 0
 
 # Trouver la position initiale du joueur
 for y, row in enumerate(map_grid):
@@ -52,6 +56,15 @@ for y, row in enumerate(map_grid):
             player_x = x
             player_y = y
 
+
+def draw_hud(canvas):
+    """Dessine l'ATH avec les vies et le score"""
+    # Fond de l'ATH
+    canvas.create_rectangle(0, HEIGHT - 50, WIDTH, HEIGHT, fill="gray")
+    # Affichage des vies
+    canvas.create_text(50, HEIGHT - 25, text=f"Vies: {lives}", fill="white", font=("Arial", 16))
+    # Affichage du score
+    canvas.create_text(200, HEIGHT - 25, text=f"Score: {score}", fill="white", font=("Arial", 16))
 
 def draw_map(canvas, map):
     """Draws a game map on a canvas using colored rectangles."""
@@ -70,6 +83,8 @@ def draw_map(canvas, map):
                 canvas.create_rectangle(
                     x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill=color_map[cell]
                 )
+    # Ajouter l'ATH après avoir dessiné la carte
+    draw_hud(canvas)
 
 
 def move_player(event):
@@ -100,7 +115,7 @@ def move_player(event):
         map_grid[new_y][new_x] = "P"
         player_x, player_y = new_x, new_y
 
-        # Redessiner la carte
+        # Redessiner la carte et l'ATH
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
