@@ -54,35 +54,21 @@ for y, row in enumerate(map_grid):
 
 
 def draw_map(canvas, map):
+    """Draws a game map on a canvas using colored rectangles."""
+    color_map = {
+        "C": "black",
+        "M": "grey",
+        "E": "blue",
+        "P": "red",
+        "F": "purple",
+        "U": "yellow",
+        "B": "green"
+    }
     for y, line in enumerate(map):
         for x, cell in enumerate(line):
-            if cell == "C":
+            if cell in color_map:
                 canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="black"
-                )
-            elif cell == "M":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="grey"
-                )
-            elif cell == "E":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="blue"
-                )
-            elif cell == "P":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="red"
-                )
-            elif cell == "F":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="purple"
-                )
-            elif cell == "U":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="yellow"
-                )
-            elif cell == "B":
-                canvas.create_rectangle(
-                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="green"
+                    x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill=color_map[cell]
                 )
 
 
