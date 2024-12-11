@@ -8,6 +8,7 @@ import tkinter as tk
 # un fantôme (F)
 # un upgrade (U)
 # une bombe (B)
+# une explosion (X)
 
 # La carte sous forme de variable Python
 map_data = [
@@ -120,6 +121,34 @@ def move_player(event):
         draw_map(canvas, map_grid)
 
 
+def place_bomb(event):
+    global player_x, player_y, canvas
+
+    if map_grid[player_y][player_x] == "P":  # Placer une bombe à la position du joueur
+        map_grid[player_y][player_x] = "B"
+        canvas.delete("all")
+        draw_map(canvas, map_grid)
+
+        # Délai avant l'explosion
+        canvas.after(5000, explode_bomb, player_x, player_y)
+
+def explode_bomb(x, y):
+    global canvas
+
+    # Remplacer les cases affectées par une explosion (X)
+    for dy in range(-3, 4):
+        if 0 <= y + dy < len(map_grid) and map_grid[y + dy][x] == "M":
+            map_grid[y + dy][x] = "X"
+    for dx in range(-3, 4):
+        if 0 <= x + dx < len(map_grid[0]) and map_grid[y][x + dx] == "M":
+            map_grid[y][x + dx] = "X"
+
+    # Effacer la bombe
+    map_grid[y][x] = " "
+
+    canvas.delete("all")
+    draw_map(canvas, map_grid)
+    
 def main():
     global canvas
     root = tk.Tk()
@@ -132,6 +161,7 @@ def main():
     root.bind("<Down>", move_player)
     root.bind("<Left>", move_player)
     root.bind("<Right>", move_player)
+    root.bind("<space>", place_bomb)
 
     draw_map(canvas, map_grid)
     root.mainloop()
