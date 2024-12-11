@@ -65,9 +65,16 @@ for y, row in enumerate(map_grid):
 def draw_hud(canvas):
     """Dessine l'ATH avec les vies, le score et le tour actuel"""
     canvas.create_rectangle(0, HEIGHT - 50, WIDTH, HEIGHT, fill="gray")
-    canvas.create_text(50, HEIGHT - 25, text=f"Vies: {lives}", fill="white", font=("Arial", 16))
-    canvas.create_text(200, HEIGHT - 25, text=f"Score: {score}", fill="white", font=("Arial", 16))
-    canvas.create_text(350, HEIGHT - 25, text=f"Tour: {current_turn}", fill="white", font=("Arial", 16))
+    canvas.create_text(
+        50, HEIGHT - 25, text=f"Vies: {lives}", fill="white", font=("Arial", 16)
+    )
+    canvas.create_text(
+        200, HEIGHT - 25, text=f"Score: {score}", fill="white", font=("Arial", 16)
+    )
+    canvas.create_text(
+        350, HEIGHT - 25, text=f"Tour: {current_turn}", fill="white", font=("Arial", 16)
+    )
+
 
 def draw_map(canvas, map):
     """Draws a game map on a canvas using colored rectangles."""
@@ -125,63 +132,80 @@ def move_player(event):
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
-def blink_bomb(canvas, x, y, color, delay=100):
+
+def blink_bomb(canvas, x, y, color, delay=100, blinks=3):
     """Fait clignoter une bombe avant explosion."""
-    for _ in range(3):
-        canvas.create_rectangle(
-            x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill=color
-        )
-        canvas.update()
-        canvas.after(delay)
-        canvas.create_rectangle(
-            x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill="green"
-        )
-        canvas.update()
-        canvas.after(delay)
+
+    def toggle_blink(state):
+        nonlocal blinks
+        if blinks > 0:
+            fill_color = color if state else "green"
+            canvas.create_rectangle(
+                x * 32, y * 32, x * 32 + 32, y * 32 + 32, fill=fill_color, outline=""
+            )
+            canvas.update()
+            blinks -= 0.5  # Chaque cycle compte pour 0.5 (ON/OFF)
+            canvas.after(delay, toggle_blink, not state)
+
+    toggle_blink(True)
+
 
 def place_bomb(event):
     global player_x, player_y, canvas, current_turn
 
-    if map_grid[player_y][player_x] == "P":  # Placer une bombe à la position du joueur
-        map_grid[player_y][player_x] = "B"
+    if map_grid[player_y][player_x] == "P":  # Vérifie si le joueur est sur une case valide
+        map_grid[player_y][player_x] = "B"  # Place la bombe
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
         # Faire clignoter la bombe
-        blink_bomb(canvas, player_x, player_y, "green")
+        blink_bomb(canvas, player_x, player_y, "red", delay=300)
+
         # Faire exploser la bombe après 3 secondes
         canvas.after(3000, explode_bomb, player_x, player_y)
 
-        # Incrémenter le tour après avoir placé une bombe
+        # Incrémenter le tour
         current_turn += 1
 
 def explode_bomb(x, y):
     global canvas, player_x, player_y, lives
 
     def perform_explosion():
-        # Remplacer les cases affectées par une explosion (X)
-        for dy in range(-3, 4):
-            if 0 <= y + dy < len(map_grid):
-                if map_grid[y + dy][x] != "C":
-                    map_grid[y + dy][x] = "X"
-                    if y + dy == player_y and x == player_x:
+        # Rayon d'explosion
+        explosion_range = 3
+
+        # Affecte les cases verticalement
+        for dy in range(-explosion_range, explosion_range + 1):
+            ny = y + dy
+            if 0 <= ny < len(map_grid):
+                if map_grid[ny][x] != "C":  # Évite les blocs indestructibles
+                    map_grid[ny][x] = "X"
+                    if ny == player_y and x == player_x:  # Vérifie si le joueur est touché
                         lives -= 1
-        for dx in range(-3, 4):
-            if 0 <= x + dx < len(map_grid[0]):
-                if map_grid[y][x + dx] != "C":
-                    map_grid[y][x + dx] = "X"
-                    if y == player_y and x + dx == player_x:
+                else:
+                    break  # Stoppe l'explosion dans cette direction
+
+        # Affecte les cases horizontalement
+        for dx in range(-explosion_range, explosion_range + 1):
+            nx = x + dx
+            if 0 <= nx < len(map_grid[0]):
+                if map_grid[y][nx] != "C":  # Évite les blocs indestructibles
+                    map_grid[y][nx] = "X"
+                    if y == player_y and nx == player_x:  # Vérifie si le joueur est touché
                         lives -= 1
+                else:
+                    break  # Stoppe l'explosion dans cette direction
 
         # Effacer la bombe
         map_grid[y][x] = " "
 
+        # Met à jour l'affichage
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
-    # Delay the explosion effect
-    canvas.after(3000, perform_explosion)
-    
+    # Exécute l'explosion après un délai
+    perform_explosion()
+
 def main():
     global canvas
     root = tk.Tk()
