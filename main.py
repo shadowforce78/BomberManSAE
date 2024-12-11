@@ -167,10 +167,12 @@ def place_bomb(event):
         # Incrémenter le tour
         current_turn += 1
 
+
 def explode_bomb(x, y):
     global canvas, player_x, player_y, lives
 
     def perform_explosion():
+        global lives  # Ajout de cette ligne pour accéder à lives
         # Rayon d'explosion
         explosion_range = 3
 
@@ -203,8 +205,22 @@ def explode_bomb(x, y):
         canvas.delete("all")
         draw_map(canvas, map_grid)
 
-    # Exécute l'explosion après un délai
+        # Ajoute un timer pour effacer les explosions après 1 seconde
+        canvas.after(1000, clear_explosions)
+
+    def clear_explosions():
+        # Efface toutes les explosions de la carte
+        for y in range(len(map_grid)):
+            for x in range(len(map_grid[0])):
+                if map_grid[y][x] == "X":
+                    map_grid[y][x] = " "
+        # Met à jour l'affichage
+        canvas.delete("all")
+        draw_map(canvas, map_grid)
+
+    # Exécute l'explosion
     perform_explosion()
+
 
 def main():
     global canvas
