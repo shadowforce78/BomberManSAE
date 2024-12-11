@@ -79,7 +79,6 @@ def draw_map(canvas, map):
         "F": "purple",
         "U": "yellow",
         "B": "green",
-        "X": "orange",
     }
     for y, line in enumerate(map):
         for x, cell in enumerate(line):
@@ -159,25 +158,29 @@ def place_bomb(event):
 def explode_bomb(x, y):
     global canvas, player_x, player_y, lives
 
-    # Remplacer les cases affectées par une explosion (X)
-    for dy in range(-3, 4):
-        if 0 <= y + dy < len(map_grid):
-            if map_grid[y + dy][x] != "C":
-                map_grid[y + dy][x] = "X"
-                if y + dy == player_y and x == player_x:
-                    lives -= 1
-    for dx in range(-3, 4):
-        if 0 <= x + dx < len(map_grid[0]):
-            if map_grid[y][x + dx] != "C":
-                map_grid[y][x + dx] = "X"
-                if y == player_y and x + dx == player_x:
-                    lives -= 1
+    def perform_explosion():
+        # Remplacer les cases affectées par une explosion (X)
+        for dy in range(-3, 4):
+            if 0 <= y + dy < len(map_grid):
+                if map_grid[y + dy][x] != "C":
+                    map_grid[y + dy][x] = "X"
+                    if y + dy == player_y and x == player_x:
+                        lives -= 1
+        for dx in range(-3, 4):
+            if 0 <= x + dx < len(map_grid[0]):
+                if map_grid[y][x + dx] != "C":
+                    map_grid[y][x + dx] = "X"
+                    if y == player_y and x + dx == player_x:
+                        lives -= 1
 
-    # Effacer la bombe
-    map_grid[y][x] = " "
+        # Effacer la bombe
+        map_grid[y][x] = " "
 
-    canvas.delete("all")
-    draw_map(canvas, map_grid)
+        canvas.delete("all")
+        draw_map(canvas, map_grid)
+
+    # Delay the explosion effect
+    canvas.after(3000, perform_explosion)
     
 def main():
     global canvas
