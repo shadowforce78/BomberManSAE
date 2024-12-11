@@ -4,7 +4,7 @@ import tkinter as tk
 # une colonne (C)
 # une prise ethernet (E)
 # Pour les cases vides
-# le bomber (P)
+# le bomberman (P)
 # un fantôme (F)
 # un upgrade (U)
 # une bombe (B)
