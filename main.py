@@ -1,4 +1,4 @@
-#coding: utf-8
+# coding: utf-8
 from tkiteasy import *
 import random
 import math
@@ -6,8 +6,16 @@ import math
 # ouverture de fenêtre
 g = ouvrirFenetre(800, 800)
 
+# un mur (M)
+# une colonne (C)
+# une prise ethernet (E)
+# Pour les cases vides
+# le bomberman (P)
+# un fantôme (F)
+# un upgrade (U)
+# une bombe (B)
+# une explosion (X)
 
-# votre programme ICI
 
 class Block:
     def __init__(self, x, y, c):
@@ -15,53 +23,85 @@ class Block:
         self.y = y
         self.c = c
 
-    def Colonne (x,y,c):
-        g.dessinerRectangle(x*c,y*c,c,c,"DarkSlateGray")
-        g.dessinerLigne(x*c,y*c,x*c,y*c+c,"black")
-        g.dessinerLigne(x*c,y*c,x*c+c,y*c,"black")
-        g.dessinerLigne(x*c,y*c+c,x*c+c,y*c+c,"black")
-        g.dessinerLigne(x*c+c,y*c,x*c+c,y*c+c,"black")
-        g.dessinerLigne(x*c,y*c+c,x*c+c,y*c,"black")
-        g.dessinerLigne(x*c,y*c,x*c+c,y*c+c,"black")
+    def Colonne(x, y, c):
+        g.dessinerRectangle(x * c, y * c, c, c, "DarkSlateGray")
+        g.dessinerLigne(x * c, y * c, x * c, y * c + c, "black")
+        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "black")
+        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "black")
+        g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "black")
+        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c, "black")
+        g.dessinerLigne(x * c, y * c, x * c + c, y * c + c, "black")
 
-    def Mur (x,y,c):
-        g.dessinerRectangle(x*c,y*c,c,c,"red")
-        g.dessinerLigne(x*c,y*c,x*c,y*c+c,"darkred")
-        g.dessinerLigne(x*c,y*c,x*c+c,y*c,"darkred")
-        g.dessinerLigne(x*c,y*c+c,x*c+c,y*c+c,"darkred")
-        g.dessinerLigne(x*c+c,y*c,x*c+c,y*c+c,"darkred")
-        g.dessinerLigne(x*c+(c//2),y*c,x*c+(c//2),y*c+c,"darkred")
-        g.dessinerLigne(x*c,y*c+(c//2),x*c+c,y*c+(c//2),"darkred")
+    def Mur(x, y, c):
+        g.dessinerRectangle(x * c, y * c, c, c, "red")
+        g.dessinerLigne(x * c, y * c, x * c, y * c + c, "darkred")
+        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
+        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
+        g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
+        g.dessinerLigne(x * c + (c // 2), y * c, x * c + (c // 2), y * c + c, "darkred")
+        g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
 
-    def Sol (x,y,c):
-        g.dessinerRectangle(x*c,y*c,c,c,"bisque")
-        g.dessinerLigne(x*c,y*c,x*c+c,y*c,"brown")
-        g.dessinerLigne(x*c,y*c+(c//1.5),x*c+c,y*c+(c//1.5),"brown")
-        g.dessinerLigne(x*c,y*c+(c//3),x*c+c,y*c+(c//3),"brown")
+    def Sol(x, y, c):
+        g.dessinerRectangle(x * c, y * c, c, c, "bisque")
+        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
+        g.dessinerLigne(
+            x * c, y * c + (c // 1.5), x * c + c, y * c + (c // 1.5), "brown"
+        )
+        g.dessinerLigne(x * c, y * c + (c // 3), x * c + c, y * c + (c // 3), "brown")
 
-def readmap1 ():
-    with open('map0.txt', 'r') as file:
+
+class Player:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.health = 100
+        self.lives = 3
+        self.bombs = 1
+        self.bomb_range = 1
+        self.speed = 1
+
+    def draw(self):
+        g.dessinerRectangle(
+            self.x * self.size, self.y * self.size, self.size, self.size, "Yellow"
+        )
+
+    def move(self, dx, dy):
+        self.x += dx
+        self.y += dy
+
+    def take_damage(self, amount):
+        self.health -= amount
+        if self.health <= 0:
+            self.lives -= 1
+            if self.lives > 0:
+                self.health = 100
+
+
+def readmap1():
+    players = []
+    with open("map0.txt", "r") as file:
         map1 = file.readlines()
-    for col in range(0,len(map1)-3):
-        mp = map1[col+3]
+    for col in range(0, len(map1) - 3):
+        mp = map1[col + 3]
         print(mp)
-        for lig in range(0,len(mp)):
+        for lig in range(0, len(mp)):
             if mp[lig] == "C":
-                Block.Colonne(lig,col,20)
-                #g.dessinerRectangle(lig*20,col*20,20,20,"LightSlateGray")
+                Block.Colonne(lig, col, 20)
             elif mp[lig] == "M":
-                Block.Mur(lig,col,20)
-                #g.dessinerRectangle(lig*20,col*20,20,20,"Aliceblue")
+                Block.Mur(lig, col, 20)
             elif mp[lig] == "E":
-                g.dessinerRectangle(lig*20,col*20,20,20,"DarkViolet")
+                g.dessinerRectangle(lig * 20, col * 20, 20, 20, "DarkViolet")
             elif mp[lig] == " ":
-                Block.Sol(lig,col,20)
-                #g.dessinerRectangle(lig*20,col*20,20,20,"bisque")
+                Block.Sol(lig, col, 20)
             elif mp[lig] == "P":
-                g.dessinerRectangle(lig*20,col*20,20,20,"Yellow")
+                player = Player(lig, col, 20)
+                players.append(player)
+                player.draw()
+    return players
 
 
-readmap1()
+players = readmap1()
 
 # boucle à vide qui attend un clic
 while g.recupererClic() == None:
