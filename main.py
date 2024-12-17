@@ -232,7 +232,9 @@ class Player:
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
-            print(f"[DEBUG] Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})")
+            print(
+                f"[DEBUG] Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})"
+            )
             self.x += dx
             self.y += dy
             # Redessine le sol à l'ancienne position
@@ -277,7 +279,7 @@ class Player:
         for bomb in self.active_bombs:
             if bomb.update(map_data):
                 bombs_to_remove.append(bomb)
-        
+
         if bombs_to_remove:
             print(f"[DEBUG] Removing {len(bombs_to_remove)} exploded bombs")
         # Retirer les bombes qui ont explosé
@@ -333,7 +335,7 @@ while True:
             player.tour += 1
     elif key == "Right":
         if player.move(1, 0, map_data):
-            player.tour += 1 
+            player.tour += 1
     elif key == "Up":
         if player.move(0, -1, map_data):
             player.tour += 1
