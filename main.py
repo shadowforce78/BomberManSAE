@@ -104,7 +104,7 @@ class Player:
     def draw_hud(self):
         # Affiche l'ATH en haut à gauche avec des caractères ASCII
         hud_text = f"Vies: {self.lives} | Bombes: {self.bombs} | Score: {self.score}"
-        g.afficherTexte(hud_text, 120, 20, "white", 16)
+        g.afficherTexte(hud_text, 200, 20, "white", 16)  # x changé de 120 à 200
 
 
 def readmap1():
@@ -140,7 +140,7 @@ player = players[0]  # Le premier joueur
 # Boucle principale du jeu
 while True:
     # Efface l'ancien HUD avec un rectangle noir (fond)
-    g.dessinerRectangle(0, 0, 300, 40, "black")
+    g.dessinerRectangle(0, 0, 400, 40, "black")  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
     # Affiche le nouveau HUD
     player.draw_hud()
     
