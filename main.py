@@ -120,15 +120,101 @@ class Block:
         )
 
 
+class Bomb:
+    def __init__(self, x, y, size, player):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.player = player
+        self.timer = 5
+        self.sprite = None
+        self.turns_left = 5  # Nombre de tours avant explosion
+
+    def draw(self):
+        # Efface l'ancien sprite si il existe
+        if self.sprite:
+            g.supprimer(self.sprite)
+        # Crée le nouveau sprite
+        self.sprite = g.dessinerRectangle(
+            self.x * self.size, self.y * self.size, self.size, self.size, "black"
+        )
+
+    def explode(self, map_data):
+        # Crée une explosion à la position de la bombe
+        Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data)
+        # Supprime la bombe
+        self.remove()
+
+    def remove(self):
+        # Efface le sprite
+        g.supprimer(self.sprite)
+        # Supprime la bombe de la liste des bombes du joueur
+        self.player.bombs.remove(self)
+
+    def update(self, map_data):
+        self.turns_left -= 1
+        if self.turns_left <= 0:
+            self.explode(map_data)
+            return True
+        return False
+
+
+class Explosion:
+    def __init__(self, x, y, size, range, map_data):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.range = range
+        self.map_data = map_data
+        self.sprite = None
+        self.draw()
+        self.damage()
+
+    def draw(self):
+        # Efface l'ancien sprite si il existe
+        if self.sprite:
+            g.supprimer(self.sprite)
+        # Crée le nouveau sprite
+        self.sprite = g.dessinerRectangle(
+            self.x * self.size, self.y * self.size, self.size, self.size, "red"
+        )
+
+    def damage(self):
+        # Détruit les murs et tue les joueurs à la portée de l'explosion
+        # Mur, joueur et fantôme, le reste est indestructible
+        for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
+            for i in range(1, self.range + 1):
+                new_x = self.x + dx * i
+                new_y = self.y + dy * i
+                if 0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(
+                    self.map_data
+                ):
+                    if self.map_data[new_y][new_x] == "M":
+                        # Détruit le mur
+                        Block.Sol(new_x, new_y, self.size)
+                        break
+                    elif self.map_data[new_y][new_x] == "P":
+                        Player.take_damage(1)
+                        break
+                    elif self.map_data[new_y][new_x] == "F":
+                        # Détruit le fantôme
+                        break
+                    else:
+                        # Arrête l'explosion
+                        break
+
+
 class Player:
     def __init__(self, x, y, size):
         self.x = x
         self.y = y
         self.size = size
         self.lives = 3
-        self.bombs = 1
+        self.max_bombs = 1  # Maximum number of bombs player can place
+        self.active_bombs = []  # List to store active bombs
         self.bomb_range = 4
         self.speed = 1
+        self.tour = 0
         self.sprite = None
         self.score = 0
 
@@ -173,8 +259,19 @@ class Player:
 
     def draw_hud(self):
         # Affiche l'ATH en haut à gauche avec des caractères ASCII
-        hud_text = f"Vies: {self.lives} | Bombes: {self.bombs} | Score: {self.score}"
-        g.afficherTexte(hud_text, 200, 20, "white", 16)  # x changé de 120 à 200
+        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Score: {self.score} | Tour: {self.tour}"
+        g.afficherTexte(hud_text, 200, 20, "white", 16)
+
+    def update_bombs(self, map_data):
+        # Mettre à jour toutes les bombes actives
+        bombs_to_remove = []
+        for bomb in self.active_bombs:
+            if bomb.update(map_data):
+                bombs_to_remove.append(bomb)
+        
+        # Retirer les bombes qui ont explosé
+        for bomb in bombs_to_remove:
+            self.active_bombs.remove(bomb)
 
 
 def readmap1():
@@ -219,15 +316,28 @@ while True:
 
     # Gestion des mouvements
     if key == "Left":
-        player.move(-1, 0, map_data)
+        if player.move(-1, 0, map_data):
+            player.tour += 1
     elif key == "Right":
-        player.move(1, 0, map_data)
+        if player.move(1, 0, map_data):
+            player.tour += 1
     elif key == "Up":
-        player.move(0, -1, map_data)
+        if player.move(0, -1, map_data):
+            player.tour += 1
     elif key == "Down":
-        player.move(0, 1, map_data)
+        if player.move(0, 1, map_data):
+            player.tour += 1
+    elif key == "space":
+        if len(player.active_bombs) < player.max_bombs:
+            bomb = Bomb(player.x, player.y, player.size, player)
+            bomb.draw()
+            player.active_bombs.append(bomb)
+            player.tour += 1
     elif key == "Escape":
         break
+
+    # Gestion des bombes
+    player.update_bombs(map_data)
 
     # Rafraîchit l'affichage
     g.actualiser()
