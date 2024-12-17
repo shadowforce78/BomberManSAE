@@ -129,6 +129,7 @@ class Bomb:
         self.timer = 5
         self.sprite = None
         self.turns_left = 5  # Nombre de tours avant explosion
+        print(f"[DEBUG] New bomb placed at ({x},{y})")
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -140,6 +141,7 @@ class Bomb:
         )
 
     def explode(self, map_data):
+        print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
         # Crée une explosion à la position de la bombe
         Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data)
         # Supprime la bombe
@@ -149,10 +151,11 @@ class Bomb:
         # Efface le sprite
         g.supprimer(self.sprite)
         # Supprime la bombe de la liste des bombes du joueur
-        self.player.bombs.remove(self)
+        self.player.active_bombs.remove(self)
 
     def update(self, map_data):
         self.turns_left -= 1
+        print(f"[DEBUG] Bomb at ({self.x},{self.y}) - {self.turns_left} turns left")
         if self.turns_left <= 0:
             self.explode(map_data)
             return True
@@ -229,6 +232,7 @@ class Player:
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
+            print(f"[DEBUG] Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})")
             self.x += dx
             self.y += dy
             # Redessine le sol à l'ancienne position
@@ -236,12 +240,15 @@ class Player:
             # Redessine le joueur à la nouvelle position
             self.draw()
             return True
+        print(f"[DEBUG] Movement blocked at ({self.x+dx},{self.y+dy})")
         return False
 
     def take_damage(self, amount):
+        print(f"[DEBUG] Player taking {amount} damage. Lives before: {self.lives}")
         self.lives -= amount
+        print(f"[DEBUG] Lives after: {self.lives}")
         if self.lives <= 0:
-            # Game over
+            print("[DEBUG] Game Over triggered")
             g.afficherTexte("Game Over", 200, 200, "red", 32)
             g.actualiser()
             g.attendreClic()
@@ -263,12 +270,16 @@ class Player:
         g.afficherTexte(hud_text, 200, 20, "white", 16)
 
     def update_bombs(self, map_data):
+        if self.active_bombs:
+            print(f"[DEBUG] Updating {len(self.active_bombs)} active bombs")
         # Mettre à jour toutes les bombes actives
         bombs_to_remove = []
         for bomb in self.active_bombs:
             if bomb.update(map_data):
                 bombs_to_remove.append(bomb)
         
+        if bombs_to_remove:
+            print(f"[DEBUG] Removing {len(bombs_to_remove)} exploded bombs")
         # Retirer les bombes qui ont explosé
         for bomb in bombs_to_remove:
             self.active_bombs.remove(bomb)
@@ -315,12 +326,14 @@ while True:
     key = g.recupererTouche()
 
     # Gestion des mouvements
+    if key:  # Seulement si une touche est pressée
+        print(f"[DEBUG] Key pressed: {key}")
     if key == "Left":
         if player.move(-1, 0, map_data):
             player.tour += 1
     elif key == "Right":
         if player.move(1, 0, map_data):
-            player.tour += 1
+            player.tour += 1 
     elif key == "Up":
         if player.move(0, -1, map_data):
             player.tour += 1
