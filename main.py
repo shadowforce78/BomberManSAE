@@ -4,7 +4,8 @@ import random
 import math
 
 # ouverture de fenêtre
-g = ouvrirFenetre(800, 800)
+L, H = 800, 800
+g = ouvrirFenetre(L, H)
 
 # un mur (M)
 # une colonne (C)
@@ -93,7 +94,7 @@ class Player:
         # Calcule la nouvelle position
         new_x = self.x + dx
         new_y = self.y + dy
-        
+
         # Vérifie si la nouvelle position est dans les limites et n'est pas un mur/colonne
         if 0 <= new_x < len(map_data[0]) and 0 <= new_y < len(map_data):
             return map_data[int(new_y)][int(new_x)] not in ["M", "C", "E"]
@@ -105,19 +106,22 @@ def readmap1():
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
     for col in range(0, len(map1) - 3):
-        mp = map1[col + 3]
-        print(mp)
+        mp = map1[col + 3].strip()
+        print(repr(mp))
+        BI = len(mp)
         for lig in range(0, len(mp)):
             if mp[lig] == "C":
-                Block.Colonne(lig, col, 20)
+                Block.Colonne(lig, col, L // BI)
             elif mp[lig] == "M":
-                Block.Mur(lig, col, 20)
+                Block.Mur(lig, col, L // BI)
             elif mp[lig] == "E":
-                g.dessinerRectangle(lig * 20, col * 20, 20, 20, "DarkViolet")
+                g.dessinerRectangle(
+                    lig * L // BI, col * L // BI, L // BI, L // BI, "DarkViolet"
+                )
             elif mp[lig] == " ":
-                Block.Sol(lig, col, 20)
+                Block.Sol(lig, col, L // BI)
             elif mp[lig] == "P":
-                player = Player(lig, col, 20)
+                player = Player(lig, col, L // BI)
                 players.append(player)
                 player.draw()
     return players, map1[3:]  # Retourne aussi les données de la carte
@@ -131,7 +135,7 @@ player = players[0]  # Le premier joueur
 while True:
     # Récupère la touche pressée
     key = g.recupererTouche()
-    
+
     # Gestion des mouvements
     if key == "Left":
         player.move(-1, 0, map_data)
@@ -143,7 +147,7 @@ while True:
         player.move(0, 1, map_data)
     elif key == "Escape":
         break
-    
+
     # Rafraîchit l'affichage
     g.actualiser()
     g.pause(0.05)  # Petit délai pour contrôler la vitesse du jeu
