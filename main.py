@@ -62,6 +62,7 @@ class Player:
         self.bomb_range = 1
         self.speed = 1
         self.sprite = None  # Pour stocker la référence du sprite actuel
+        self.score = 0  # Ajout du score
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -100,6 +101,11 @@ class Player:
             return map_data[int(new_y)][int(new_x)] not in ["M", "C", "E"]
         return False
 
+    def draw_hud(self):
+        # Affiche l'ATH en haut à gauche avec des caractères ASCII
+        hud_text = f"Vies: {self.lives} | Bombes: {self.bombs} | Score: {self.score}"
+        g.afficherTexte(hud_text, 120, 20, "white", 16)
+
 
 def readmap1():
     players = []
@@ -133,6 +139,11 @@ player = players[0]  # Le premier joueur
 
 # Boucle principale du jeu
 while True:
+    # Efface l'ancien HUD avec un rectangle noir (fond)
+    g.dessinerRectangle(0, 0, 300, 40, "black")
+    # Affiche le nouveau HUD
+    player.draw_hud()
+    
     # Récupère la touche pressée
     key = g.recupererTouche()
 
