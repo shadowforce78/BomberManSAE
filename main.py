@@ -60,8 +60,8 @@ class Player:
         self.bombs = 1
         self.bomb_range = 4
         self.speed = 1
-        self.sprite = None  # Pour stocker la référence du sprite actuel
-        self.score = 0  # Ajout du score
+        self.sprite = None
+        self.score = 0
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -141,10 +141,12 @@ player = players[0]  # Le premier joueur
 # Boucle principale du jeu
 while True:
     # Efface l'ancien HUD avec un rectangle noir (fond)
-    g.dessinerRectangle(0, 0, 400, 40, "black")  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
+    g.dessinerRectangle(
+        0, 0, 400, 40, "black"
+    )  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
     # Affiche le nouveau HUD
     player.draw_hud()
-    
+
     # Récupère la touche pressée
     key = g.recupererTouche()
 
