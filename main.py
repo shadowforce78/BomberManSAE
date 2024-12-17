@@ -34,21 +34,90 @@ class Block:
         g.dessinerLigne(x * c, y * c, x * c + c, y * c + c, "black")
 
     def Mur(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "red")
+        g.dessinerRectangle(x * c, y * c, c, c, "firebrick")
         g.dessinerLigne(x * c, y * c, x * c, y * c + c, "darkred")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
         g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
         g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(x * c + (c // 2), y * c, x * c + (c // 2), y * c + c, "darkred")
+        g.dessinerLigne(
+            x * c + (c // 2),
+            y * c + (c // 3.5),
+            x * c + (c // 2),
+            y * c + (c // 2),
+            "darkred",
+        )
+        g.dessinerLigne(
+            x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 2),
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            "darkred",
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3),
+            y * c + (c // 2),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "darkred",
+        )
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
+        g.dessinerLigne(
+            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred"
+        )  # in process of renovation
 
     def Sol(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "bisque")
+        g.dessinerRectangle(x * c, y * c, c, c, "tan")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
+        g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "brown")
         g.dessinerLigne(
-            x * c, y * c + (c // 1.5), x * c + c, y * c + (c // 1.5), "brown"
+            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown"
         )
-        g.dessinerLigne(x * c, y * c + (c // 3), x * c + c, y * c + (c // 3), "brown")
+        g.dessinerLigne(
+            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown"
+        )
+
+    def Ethernet(x, y, c):
+        g.dessinerRectangle(x * c, y * c, c, c, "BlanchedAlmond")
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 3.5),
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3),
+            y * c + (c // 3.5),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 3.5),
+            x * c + (c // 1.3),
+            y * c + (c // 3.5),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "black",
+        )
 
 
 class Player:
@@ -122,9 +191,7 @@ def readmap1():
             elif mp[lig] == "M":
                 Block.Mur(lig, col, L // BI)
             elif mp[lig] == "E":
-                g.dessinerRectangle(
-                    lig * L // BI, col * L // BI, L // BI, L // BI, "DarkViolet"
-                )
+                Block.Ethernet(lig, col, L // BI)
             elif mp[lig] == " ":
                 Block.Sol(lig, col, L // BI)
             elif mp[lig] == "P":
