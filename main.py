@@ -144,14 +144,13 @@ class Bomb:
         print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
         # Crée une explosion à la position de la bombe
         Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data)
-        # Supprime la bombe
-        self.remove()
+        # Note: no longer calling self.remove() here
 
     def remove(self):
+        print(f"[DEBUG] Removing bomb sprite at ({self.x},{self.y})")
         # Efface le sprite
-        g.supprimer(self.sprite)
-        # Supprime la bombe de la liste des bombes du joueur
-        self.player.active_bombs.remove(self)
+        if self.sprite:
+            g.supprimer(self.sprite)
 
     def update(self, map_data):
         self.turns_left -= 1
@@ -169,6 +168,7 @@ class Explosion:
         self.size = size
         self.range = range
         self.map_data = map_data
+        self.player = None  # Store reference to affected player
         self.sprite = None
         self.draw()
         self.damage()
@@ -274,17 +274,16 @@ class Player:
     def update_bombs(self, map_data):
         if self.active_bombs:
             print(f"[DEBUG] Updating {len(self.active_bombs)} active bombs")
-        # Mettre à jour toutes les bombes actives
         bombs_to_remove = []
         for bomb in self.active_bombs:
             if bomb.update(map_data):
                 bombs_to_remove.append(bomb)
+                bomb.remove()  # Remove sprite first
 
         if bombs_to_remove:
             print(f"[DEBUG] Removing {len(bombs_to_remove)} exploded bombs")
-        # Retirer les bombes qui ont explosé
-        for bomb in bombs_to_remove:
-            self.active_bombs.remove(bomb)
+            # Remove bombs from active_bombs list
+            self.active_bombs = [b for b in self.active_bombs if b not in bombs_to_remove]
 
 
 def readmap1():
