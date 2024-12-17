@@ -56,10 +56,9 @@ class Player:
         self.x = x
         self.y = y
         self.size = size
-        self.health = 100
         self.lives = 3
         self.bombs = 1
-        self.bomb_range = 1
+        self.bomb_range = 4
         self.speed = 1
         self.sprite = None  # Pour stocker la référence du sprite actuel
         self.score = 0  # Ajout du score
@@ -85,11 +84,13 @@ class Player:
         return False
 
     def take_damage(self, amount):
-        self.health -= amount
-        if self.health <= 0:
-            self.lives -= 1
-            if self.lives > 0:
-                self.health = 100
+        self.lives -= amount
+        if self.lives <= 0:
+            # Game over
+            g.afficherTexte("Game Over", 200, 200, "red", 32)
+            g.actualiser()
+            g.attendreClic()
+            g.fermerFenetre()
 
     def can_move(self, dx, dy, map_data):
         # Calcule la nouvelle position
