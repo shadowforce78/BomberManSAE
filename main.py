@@ -127,19 +127,31 @@ class Bomb:
         self.size = size
         self.player = player
         self.sprite = None
-        self.explosion_turn = player.tour + 5  # La bombe explosera dans 5 tours
-        print(
-            f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}"
-        )
+        self.fuse_sprite = None  # Nouveau sprite pour la mèche
+        self.explosion_turn = player.tour + 5
+        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}")
+        self.draw()  # Dessine la bombe immédiatement à la création
 
     def draw(self):
-        # Efface l'ancien sprite si il existe
-        if self.sprite:
-            g.supprimer(self.sprite)
-        # Crée le nouveau sprite
-        self.sprite = g.dessinerRectangle(
-            self.x * self.size, self.y * self.size, self.size, self.size, "black"
-        )
+        # Ne redessine que si les sprites n'existent pas
+        if not self.sprite:
+            # Position centrale de la bombe
+            center_x = self.x * self.size + self.size/2
+            center_y = self.y * self.size + self.size/2
+            
+            # Dessine le corps de la bombe (cercle noir)
+            self.sprite = g.dessinerDisque(center_x, center_y, self.size/2.5, "black")
+            
+            # Dessine la mèche de la bombe (petit rectangle blanc)
+            fuse_width = self.size/6
+            fuse_height = self.size/3
+            self.fuse_sprite = g.dessinerRectangle(
+                center_x - fuse_width/2,
+                center_y - fuse_height,
+                fuse_width,
+                fuse_height,
+                "white"
+            )
 
     def explode(self, map_data):
         print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
@@ -150,9 +162,13 @@ class Bomb:
 
     def remove(self):
         print(f"[DEBUG] Removing bomb sprite at ({self.x},{self.y})")
-        # Efface le sprite
+        # Efface les deux sprites
         if self.sprite:
             g.supprimer(self.sprite)
+            self.sprite = None
+        if self.fuse_sprite:
+            g.supprimer(self.fuse_sprite)
+            self.fuse_sprite = None
 
     def update(self, map_data, current_turn):
         if current_turn >= self.explosion_turn:
@@ -220,43 +236,48 @@ class Explosion:
         
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
+        Block.Sol(self.x, self.y, self.size)
         
         # Ajoute les cases dans les 4 directions
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            # Pour chaque direction, on continue jusqu'à un obstacle ou la portée maximale
             for i in range(1, self.range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
                 
-                # Vérifie si on est toujours dans les limites de la carte
+                # Vérifie les limites de la carte
                 if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
                     break
                 
-                # Vérifie la collision avec les différents éléments
                 tile = self.map_data[new_y][new_x]
                 
                 # Ajoute la case à la zone d'explosion
                 explosion_tiles.add((new_x, new_y))
                 
+                # Traitement selon le type de tile
                 if tile == "M":
-                    # Détruit le mur et arrête la propagation dans cette direction
+                    # Détruit le mur
                     Block.Sol(new_x, new_y, self.size)
                     self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
-                    break
-                elif tile == "F":
-                    # Détruit le fantôme et continue la propagation
-                    Block.Sol(new_x, new_y, self.size)
-                    self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
+                    break  # Arrête la propagation dans cette direction
                 elif tile in ["C", "E"]:
                     # Les colonnes et prises ethernet bloquent l'explosion
-                    break
+                    explosion_tiles.remove((new_x, new_y))  # Retire la case car bloquée
+                    break  # Arrête la propagation dans cette direction
                 else:
-                    # Dessine l'effet de l'explosion sur les cases vides
+                    # Case vide ou joueur, dessine l'explosion
                     Block.Sol(new_x, new_y, self.size)
 
         # Vérifie si le joueur est dans la zone d'explosion
-        if self.player and (int(self.player.x), int(self.player.y)) in explosion_tiles:
-            self.player.take_damage(1)
-            print(f"[DEBUG] Player hit by explosion at ({self.player.x}, {self.player.y})")
+        if self.player:
+            player_pos = (int(self.player.x), int(self.player.y))
+            if player_pos in explosion_tiles:
+                self.player.take_damage(1)
+                print(f"[DEBUG] Player hit by explosion at {player_pos}")
+            else:
+                print(f"[DEBUG] Player at {player_pos} safe from explosion")
+
+        print(f"[DEBUG] Explosion affected tiles: {explosion_tiles}")
 
     def _check_tile(self, x, y):
         # Vérifie et traite la case donnée
@@ -410,7 +431,7 @@ while True:
     elif key == "space":
         if len(player.active_bombs) < player.max_bombs:
             bomb = Bomb(player.x, player.y, player.size, player)
-            bomb.draw()
+            # Suppression de bomb.draw() ici car déjà appelé dans __init__
             player.active_bombs.append(bomb)
             player.tour += 1
     elif key == "Escape":
