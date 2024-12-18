@@ -126,10 +126,11 @@ class Bomb:
         self.y = y
         self.size = size
         self.player = player
-        self.timer = 5
         self.sprite = None
-        self.turns_left = 5  # Nombre de tours avant explosion
-        print(f"[DEBUG] New bomb placed at ({x},{y})")
+        self.explosion_turn = player.tour + 5  # La bombe explosera dans 5 tours
+        print(
+            f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}"
+        )
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -142,9 +143,8 @@ class Bomb:
 
     def explode(self, map_data):
         print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
-        # Crée une explosion à la position de la bombe
-        Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data)
-        # Note: no longer calling self.remove() here
+        # Passe la référence du joueur à l'explosion
+        Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data, self.player)
 
     def remove(self):
         print(f"[DEBUG] Removing bomb sprite at ({self.x},{self.y})")
@@ -152,23 +152,22 @@ class Bomb:
         if self.sprite:
             g.supprimer(self.sprite)
 
-    def update(self, map_data):
-        self.turns_left -= 1
-        print(f"[DEBUG] Bomb at ({self.x},{self.y}) - {self.turns_left} turns left")
-        if self.turns_left <= 0:
+    def update(self, map_data, current_turn):
+        if current_turn >= self.explosion_turn:
+            print(f"[DEBUG] Bomb exploding at turn {current_turn}")
             self.explode(map_data)
             return True
         return False
 
 
 class Explosion:
-    def __init__(self, x, y, size, range, map_data):
+    def __init__(self, x, y, size, range, map_data, player=None):
         self.x = x
         self.y = y
         self.size = size
         self.range = range
         self.map_data = map_data
-        self.player = None  # Store reference to affected player
+        self.player = player  # Référence au joueur qui a posé la bombe
         self.sprite = None
         self.draw()
         self.damage()
@@ -197,7 +196,8 @@ class Explosion:
                         Block.Sol(new_x, new_y, self.size)
                         break
                     elif self.map_data[new_y][new_x] == "P":
-                        Player.take_damage(1)
+                        if self.player:  # Si on a une référence au joueur
+                            self.player.take_damage(1)
                         break
                     elif self.map_data[new_y][new_x] == "F":
                         # Détruit le fantôme
@@ -273,17 +273,20 @@ class Player:
 
     def update_bombs(self, map_data):
         if self.active_bombs:
-            print(f"[DEBUG] Updating {len(self.active_bombs)} active bombs")
+            print(
+                f"[DEBUG] Updating {len(self.active_bombs)} active bombs at turn {self.tour}"
+            )
         bombs_to_remove = []
         for bomb in self.active_bombs:
-            if bomb.update(map_data):
+            if bomb.update(map_data, self.tour):
                 bombs_to_remove.append(bomb)
-                bomb.remove()  # Remove sprite first
+                bomb.remove()
 
         if bombs_to_remove:
             print(f"[DEBUG] Removing {len(bombs_to_remove)} exploded bombs")
-            # Remove bombs from active_bombs list
-            self.active_bombs = [b for b in self.active_bombs if b not in bombs_to_remove]
+            self.active_bombs = [
+                b for b in self.active_bombs if b not in bombs_to_remove
+            ]
 
 
 def readmap1():
