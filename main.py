@@ -180,29 +180,59 @@ class Explosion:
             g.supprimer(self.sprite)
 
     def damage(self):
-        # Détruit les murs et tue les joueurs à la portée de l'explosion (bomb_range)
-        # Mur, joueur et fantôme, le reste est indestructible
-        for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
+        # Créer une liste des cases touchées par l'explosion
+        explosion_tiles = set()
+        
+        # Ajoute la case centrale
+        explosion_tiles.add((self.x, self.y))
+        
+        # Ajoute les cases dans les 4 directions
+        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             for i in range(1, self.range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
-                if 0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(
-                    self.map_data
-                ):
-                    if self.map_data[new_y][new_x] == "M":
-                        # Détruit le mur
-                        Block.Sol(new_x, new_y, self.size)
-                        break
-                    elif self.map_data[new_y][new_x] == "P":
-                        if self.player:  # Si on a une référence au joueur
-                            self.player.take_damage(1)
-                        break
-                    elif self.map_data[new_y][new_x] == "F":
-                        # Détruit le fantôme
-                        break
-                    else:
-                        # Arrête l'explosion
-                        break
+                
+                # Vérifie si on est toujours dans les limites de la carte
+                if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                    break
+                
+                # Vérifie la collision avec les différents éléments
+                tile = self.map_data[new_y][new_x]
+                
+                # Ajoute la case à la zone d'explosion
+                explosion_tiles.add((new_x, new_y))
+                
+                if tile == "M":
+                    # Détruit le mur et arrête la propagation dans cette direction
+                    Block.Sol(new_x, new_y, self.size)
+                    self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
+                    break
+                elif tile == "F":
+                    # Détruit le fantôme et continue la propagation
+                    Block.Sol(new_x, new_y, self.size)
+                    self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
+                elif tile in ["C", "E"]:
+                    # Les colonnes et prises ethernet bloquent l'explosion
+                    break
+                else:
+                    # Dessine l'effet de l'explosion sur les cases vides
+                    Block.Sol(new_x, new_y, self.size)
+
+        # Vérifie si le joueur est dans la zone d'explosion
+        if self.player and (int(self.player.x), int(self.player.y)) in explosion_tiles:
+            self.player.take_damage(1)
+            print(f"[DEBUG] Player hit by explosion at ({self.player.x}, {self.player.y})")
+
+    def _check_tile(self, x, y):
+        # Vérifie et traite la case donnée
+        if self.map_data[y][x] == "M":
+            Block.Sol(x, y, self.size)
+            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x+1:]
+        elif self.map_data[y][x] == "P" and self.player:
+            self.player.take_damage(1)
+        elif self.map_data[y][x] == "F":
+            Block.Sol(x, y, self.size)
+            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x+1:]
 
 
 class Player:
