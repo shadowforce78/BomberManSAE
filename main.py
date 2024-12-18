@@ -169,15 +169,50 @@ class Explosion:
         self.size = size
         self.range = range
         self.map_data = map_data
-        self.player = player  # Référence au joueur qui a posé la bombe
-        self.sprite = None
-        self.draw()
+        self.player = player
+        self.sprites = []  # Liste pour stocker les sprites d'animation
+        self.animate()
         self.damage()
 
+    def animate(self):
+        # Animation en 3 étapes rapides
+        colors = ["red", "orange", "yellow"]
+        for color in colors:
+            # Centre de l'explosion
+            center_x = self.x * self.size + self.size/2
+            center_y = self.y * self.size + self.size/2
+            
+            # Dessine le centre
+            sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
+            self.sprites.append(sprite)
+            
+            # Dessine dans les 4 directions
+            for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+                for i in range(1, self.range + 1):
+                    new_x = self.x + dx * i
+                    new_y = self.y + dy * i
+                    
+                    if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                        break
+                        
+                    if self.map_data[new_y][new_x] in ["C", "E"]:
+                        break
+                        
+                    center_x = new_x * self.size + self.size/2
+                    center_y = new_y * self.size + self.size/2
+                    sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
+                    self.sprites.append(sprite)
+            
+            g.actualiser()
+            g.pause(0.05)  # Délai court entre chaque étape
+            
+            # Efface l'étape précédente
+            for sprite in self.sprites:
+                g.supprimer(sprite)
+            self.sprites.clear()
+
     def draw(self):
-        # Efface l'ancien sprite si il existe et remplacer par un vide
-        if self.sprite:
-            g.supprimer(self.sprite)
+        pass  # Plus besoin de cette méthode
 
     def damage(self):
         # Créer une liste des cases touchées par l'explosion
