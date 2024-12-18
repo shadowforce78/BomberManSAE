@@ -144,7 +144,9 @@ class Bomb:
     def explode(self, map_data):
         print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
         # Passe la référence du joueur à l'explosion
-        Explosion(self.x, self.y, self.size, self.player.bomb_range, map_data, self.player)
+        Explosion(
+            self.x, self.y, self.size, self.player.bomb_range, map_data, self.player
+        )
 
     def remove(self):
         print(f"[DEBUG] Removing bomb sprite at ({self.x},{self.y})")
@@ -173,16 +175,12 @@ class Explosion:
         self.damage()
 
     def draw(self):
-        # Efface l'ancien sprite si il existe
+        # Efface l'ancien sprite si il existe et remplacer par un vide
         if self.sprite:
             g.supprimer(self.sprite)
-        # Crée le nouveau sprite
-        self.sprite = g.dessinerRectangle(
-            self.x * self.size, self.y * self.size, self.size, self.size, "red"
-        )
 
     def damage(self):
-        # Détruit les murs et tue les joueurs à la portée de l'explosion
+        # Détruit les murs et tue les joueurs à la portée de l'explosion (bomb_range)
         # Mur, joueur et fantôme, le reste est indestructible
         for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
             for i in range(1, self.range + 1):
