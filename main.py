@@ -129,28 +129,30 @@ class Bomb:
         self.sprite = None
         self.fuse_sprite = None  # Nouveau sprite pour la mèche
         self.explosion_turn = player.tour + 5
-        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}")
+        print(
+            f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}"
+        )
         self.draw()  # Dessine la bombe immédiatement à la création
 
     def draw(self):
         # Ne redessine que si les sprites n'existent pas
         if not self.sprite:
             # Position centrale de la bombe
-            center_x = self.x * self.size + self.size/2
-            center_y = self.y * self.size + self.size/2
-            
+            center_x = self.x * self.size + self.size / 2
+            center_y = self.y * self.size + self.size / 2
+
             # Dessine le corps de la bombe (cercle noir)
-            self.sprite = g.dessinerDisque(center_x, center_y, self.size/2.5, "black")
-            
+            self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2.5, "black")
+
             # Dessine la mèche de la bombe (petit rectangle blanc)
-            fuse_width = self.size/6
-            fuse_height = self.size/3
+            fuse_width = self.size / 6
+            fuse_height = self.size / 3
             self.fuse_sprite = g.dessinerRectangle(
-                center_x - fuse_width/2,
+                center_x - fuse_width / 2,
                 center_y - fuse_height,
                 fuse_width,
                 fuse_height,
-                "white"
+                "white",
             )
 
     def explode(self, map_data):
@@ -195,40 +197,43 @@ class Explosion:
         colors = ["red", "orange", "yellow"]
         for color in colors:
             # Centre de l'explosion
-            center_x = self.x * self.size + self.size/2
-            center_y = self.y * self.size + self.size/2
-            
+            center_x = self.x * self.size + self.size / 2
+            center_y = self.y * self.size + self.size / 2
+
             # Dessine le centre
-            sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
+            sprite = g.dessinerDisque(center_x, center_y, self.size / 3, color)
             self.sprites.append(sprite)
-            
+
             # Dessine dans les 4 directions en respectant la portée effective
             for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
                 effective_range = self.get_explosion_range(dx, dy)
                 for i in range(1, effective_range + 1):
                     new_x = self.x + dx * i
                     new_y = self.y + dy * i
-                    
-                    if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+
+                    if not (
+                        0 <= new_x < len(self.map_data[0])
+                        and 0 <= new_y < len(self.map_data)
+                    ):
                         break
-                        
+
                     tile = self.map_data[new_y][new_x]
                     if tile in ["C", "E"]:
                         break
-                        
+
                     # Dessine l'animation sur chaque case affectée
-                    center_x = new_x * self.size + self.size/2
-                    center_y = new_y * self.size + self.size/2
-                    sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
+                    center_x = new_x * self.size + self.size / 2
+                    center_y = new_y * self.size + self.size / 2
+                    sprite = g.dessinerDisque(center_x, center_y, self.size / 3, color)
                     self.sprites.append(sprite)
-                    
+
                     # Si on touche un mur, on arrête dans cette direction
                     if tile == "M":
                         break
-            
+
             g.actualiser()
             g.pause(0.05)  # Délai court entre chaque étape
-            
+
             # Efface l'étape précédente
             for sprite in self.sprites:
                 g.supprimer(sprite)
@@ -242,47 +247,54 @@ class Explosion:
         for i in range(1, self.range + 1):
             new_x = self.x + dx * i
             new_y = self.y + dy * i
-            
+
             # Vérifie les limites de la carte
-            if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+            if not (
+                0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)
+            ):
                 return i - 1
-                
+
             tile = self.map_data[new_y][new_x]
+            # Arrête à tout obstacle
             if tile in ["M", "C", "E"]:
-                return i  # Inclut le mur/obstacle dans l'explosion
+                return i
+
         return self.range
-    
+
     def damage(self):
+        # Créer une liste des cases touchées par l'explosion
         explosion_tiles = set()
+
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
         Block.Sol(self.x, self.y, self.size)
-        
-        # Vérifie chaque direction
+
+        # Pour chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            effective_range = self.get_explosion_range(dx, dy)
-            
-            for i in range(1, effective_range + 1):
+            max_range = self.get_explosion_range(dx, dy)
+            print(f"[DEBUG] Explosion range in direction ({dx},{dy}): {max_range}")
+
+            for i in range(1, max_range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
-                
-                # Vérifie les limites
-                if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
-                    break
-                
+
                 tile = self.map_data[new_y][new_x]
+
+                # Ajoute la case à la zone d'explosion
                 explosion_tiles.add((new_x, new_y))
-                
-                # Traitement selon le type de tuile
+
                 if tile == "M":
                     Block.Sol(new_x, new_y, self.size)
-                    self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
-                    break
+                    self.map_data[new_y] = (
+                        self.map_data[new_y][:new_x]
+                        + " "
+                        + self.map_data[new_y][new_x + 1 :]
+                    )
+                    break  # Arrête après avoir détruit le mur
                 elif tile in ["C", "E"]:
                     explosion_tiles.remove((new_x, new_y))
-                    break
+                    break  # Arrête à l'obstacle
                 else:
-                    # Toujours redessiner le sol pour les cases vides
                     Block.Sol(new_x, new_y, self.size)
 
         # Vérifie si le joueur est dans la zone d'explosion
@@ -291,19 +303,34 @@ class Explosion:
             if player_pos in explosion_tiles:
                 self.player.take_damage(1)
                 print(f"[DEBUG] Player hit by explosion at {player_pos}")
+            else:
+                print(f"[DEBUG] Player at {player_pos} safe from explosion")
 
         print(f"[DEBUG] Explosion affected tiles: {explosion_tiles}")
+
+        # Call the function to replace destroyed walls
+        self.replace_destroyed_walls()
 
     def _check_tile(self, x, y):
         # Vérifie et traite la case donnée
         if self.map_data[y][x] == "M":
             Block.Sol(x, y, self.size)
-            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x+1:]
+            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x + 1 :]
         elif self.map_data[y][x] == "P" and self.player:
             self.player.take_damage(1)
         elif self.map_data[y][x] == "F":
             Block.Sol(x, y, self.size)
-            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x+1:]
+            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x + 1 :]
+
+    def replace_destroyed_walls(self):
+        for y in range(len(self.map_data)):
+            # Convert string to list
+            row = list(self.map_data[y])
+            for x in range(len(row)):
+                if row[x] == "M":
+                    row[x] = " "
+            # Join back to string
+            self.map_data[y] = "".join(row)
 
 
 class Player:
