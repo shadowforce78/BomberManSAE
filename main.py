@@ -202,22 +202,29 @@ class Explosion:
             sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
             self.sprites.append(sprite)
             
-            # Dessine dans les 4 directions
+            # Dessine dans les 4 directions en respectant la portée effective
             for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-                for i in range(1, self.range + 1):
+                effective_range = self.get_explosion_range(dx, dy)
+                for i in range(1, effective_range + 1):
                     new_x = self.x + dx * i
                     new_y = self.y + dy * i
                     
                     if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
                         break
                         
-                    if self.map_data[new_y][new_x] in ["C", "E"]:
+                    tile = self.map_data[new_y][new_x]
+                    if tile in ["C", "E"]:
                         break
                         
+                    # Dessine l'animation sur chaque case affectée
                     center_x = new_x * self.size + self.size/2
                     center_y = new_y * self.size + self.size/2
                     sprite = g.dessinerDisque(center_x, center_y, self.size/3, color)
                     self.sprites.append(sprite)
+                    
+                    # Si on touche un mur, on arrête dans cette direction
+                    if tile == "M":
+                        break
             
             g.actualiser()
             g.pause(0.05)  # Délai court entre chaque étape
@@ -230,42 +237,52 @@ class Explosion:
     def draw(self):
         pass  # Plus besoin de cette méthode
 
+    def get_explosion_range(self, dx, dy):
+        """Calcule la portée effective de l'explosion dans une direction donnée"""
+        for i in range(1, self.range + 1):
+            new_x = self.x + dx * i
+            new_y = self.y + dy * i
+            
+            # Vérifie les limites de la carte
+            if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                return i - 1
+                
+            tile = self.map_data[new_y][new_x]
+            if tile in ["M", "C", "E"]:
+                return i  # Inclut le mur/obstacle dans l'explosion
+        return self.range
+    
     def damage(self):
-        # Créer une liste des cases touchées par l'explosion
         explosion_tiles = set()
-        
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
         Block.Sol(self.x, self.y, self.size)
         
-        # Ajoute les cases dans les 4 directions
+        # Vérifie chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            # Pour chaque direction, on continue jusqu'à un obstacle ou la portée maximale
-            for i in range(1, self.range + 1):
+            effective_range = self.get_explosion_range(dx, dy)
+            
+            for i in range(1, effective_range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
                 
-                # Vérifie les limites de la carte
+                # Vérifie les limites
                 if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
                     break
                 
                 tile = self.map_data[new_y][new_x]
-                
-                # Ajoute la case à la zone d'explosion
                 explosion_tiles.add((new_x, new_y))
                 
-                # Traitement selon le type de tile
+                # Traitement selon le type de tuile
                 if tile == "M":
-                    # Détruit le mur
                     Block.Sol(new_x, new_y, self.size)
                     self.map_data[new_y] = self.map_data[new_y][:new_x] + " " + self.map_data[new_y][new_x+1:]
-                    break  # Arrête la propagation dans cette direction
+                    break
                 elif tile in ["C", "E"]:
-                    # Les colonnes et prises ethernet bloquent l'explosion
-                    explosion_tiles.remove((new_x, new_y))  # Retire la case car bloquée
-                    break  # Arrête la propagation dans cette direction
+                    explosion_tiles.remove((new_x, new_y))
+                    break
                 else:
-                    # Case vide ou joueur, dessine l'explosion
+                    # Toujours redessiner le sol pour les cases vides
                     Block.Sol(new_x, new_y, self.size)
 
         # Vérifie si le joueur est dans la zone d'explosion
@@ -274,8 +291,6 @@ class Explosion:
             if player_pos in explosion_tiles:
                 self.player.take_damage(1)
                 print(f"[DEBUG] Player hit by explosion at {player_pos}")
-            else:
-                print(f"[DEBUG] Player at {player_pos} safe from explosion")
 
         print(f"[DEBUG] Explosion affected tiles: {explosion_tiles}")
 
