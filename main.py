@@ -269,53 +269,44 @@ class Explosion:
 
         # Pour chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            direction_name = {
-                (1, 0): "droite",
-                (-1, 0): "gauche",
-                (0, 1): "bas",
-                (0, -1): "haut",
-            }
+            direction_name = {(1, 0): "droite", (-1, 0): "gauche", (0, 1): "bas", (0, -1): "haut"}
             print(f"[DEBUG] Checking direction: {direction_name[(dx,dy)]}")
-            max_range = self.get_explosion_range(dx, dy)
+            walls_destroyed = 0  # Compteur de murs détruits dans cette direction
 
-            for i in range(1, max_range + 1):
+            for i in range(1, self.range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
 
-                if not (
-                    0 <= new_x < len(self.map_data[0])
-                    and 0 <= new_y < len(self.map_data)
-                ):
+                if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
                     print(f"[DEBUG] Hit map boundary at ({new_x}, {new_y})")
                     break
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
-                print(
-                    f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}' ({'empty' if tile == ' ' else tile})"
-                )
+                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}'")
 
                 if tile == "M":
-                    print(f"[DEBUG] Destroying wall at ({new_x}, {new_y})")
+                    walls_destroyed += 1
+                    print(f"[DEBUG] Destroying wall at ({new_x}, {new_y}). Wall count: {walls_destroyed}")
                     destroyed_blocks.append((new_x, new_y))
                     Block.Sol(new_x, new_y, self.size)
                     row = list(self.map_data[new_y])
                     row[new_x] = " "
                     self.map_data[new_y] = "".join(row)
+                    if walls_destroyed >= 4:  # Stop after destroying 4 walls
+                        break
                 elif tile in ["C", "E"]:
                     print(f"[DEBUG] Hit indestructible obstacle at ({new_x}, {new_y})")
                     explosion_tiles.remove((new_x, new_y))
                     break
                 else:
-                    print(
-                        f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})"
-                    )
+                    print(f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})")
                     Block.Sol(new_x, new_y, self.size)
 
         print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
         print(f"[DEBUG] Destroyed blocks positions: {destroyed_blocks}")
 
-        # Vérifie si le joueur est dans la zone d'explosion
+        # Check player damage
         if self.player:
             player_pos = (int(self.player.x), int(self.player.y))
             if player_pos in explosion_tiles:
