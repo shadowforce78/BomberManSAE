@@ -211,11 +211,14 @@ class Explosion:
                     new_x = self.x + dx * i
                     new_y = self.y + dy * i
 
-                    if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                    if not (
+                        0 <= new_x < len(self.map_data[0])
+                        and 0 <= new_y < len(self.map_data)
+                    ):
                         break
 
                     tile = self.map_data[new_y][new_x]
-                    
+
                     # Dessine l'animation sur chaque case affectée
                     center_x = new_x * self.size + self.size / 2
                     center_y = new_y * self.size + self.size / 2
@@ -263,24 +266,34 @@ class Explosion:
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
         print(f"[DEBUG] Starting explosion at ({self.x}, {self.y})")
-        
+
         # Pour chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
-            direction_name = {(1,0): "droite", (-1,0): "gauche", (0,1): "bas", (0,-1): "haut"}
+            direction_name = {
+                (1, 0): "droite",
+                (-1, 0): "gauche",
+                (0, 1): "bas",
+                (0, -1): "haut",
+            }
             print(f"[DEBUG] Checking direction: {direction_name[(dx,dy)]}")
             max_range = self.get_explosion_range(dx, dy)
-            
+
             for i in range(1, max_range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
 
-                if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                if not (
+                    0 <= new_x < len(self.map_data[0])
+                    and 0 <= new_y < len(self.map_data)
+                ):
                     print(f"[DEBUG] Hit map boundary at ({new_x}, {new_y})")
                     break
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
-                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}' ({'empty' if tile == ' ' else tile})")
+                print(
+                    f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}' ({'empty' if tile == ' ' else tile})"
+                )
 
                 if tile == "M":
                     print(f"[DEBUG] Destroying wall at ({new_x}, {new_y})")
@@ -294,7 +307,9 @@ class Explosion:
                     explosion_tiles.remove((new_x, new_y))
                     break
                 else:
-                    print(f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})")
+                    print(
+                        f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})"
+                    )
                     Block.Sol(new_x, new_y, self.size)
 
         print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
