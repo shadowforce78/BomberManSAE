@@ -396,9 +396,9 @@ class Player:
         return False
 
     def draw_hud(self):
-        # Affiche l'ATH en haut à gauche avec des caractères ASCII
-        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Timer: {self.tour}| Score: {self.score} | Niveau: {self.lvl}"
-        g.afficherTexte(hud_text, 250, 20, "white", 16)
+        hud_text = f"Vies:{self.lives:3d} | Bombes:{self.max_bombs - len(self.active_bombs):2d} | Timer:{self.tour:4d} | Score:{self.score:5d} | Niveau:{self.lvl:2d}"
+        g.dessinerRectangle(0, 0, 800, 40, "black")
+        g.afficherTexte(hud_text, 400, 20, "white", 16)
 
     def update_bombs(self, map_data):
         if self.active_bombs:
@@ -448,10 +448,6 @@ player = players[0]  # Le premier joueur
 
 # Boucle principale du jeu
 while True:
-    # Efface l'ancien HUD avec un rectangle noir (fond)
-    g.dessinerRectangle(
-        0, 0, 530, 40, "black"
-    )  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
     # Affiche le nouveau HUD
     player.draw_hud()
 
