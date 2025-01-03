@@ -267,33 +267,31 @@ class Explosion:
 
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
-        Block.Sol(self.x, self.y, self.size)
-
+        
         # Pour chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
             max_range = self.get_explosion_range(dx, dy)
-            print(f"[DEBUG] Explosion range in direction ({dx},{dy}): {max_range}")
-
+            
             for i in range(1, max_range + 1):
                 new_x = self.x + dx * i
                 new_y = self.y + dy * i
 
-                tile = self.map_data[new_y][new_x]
+                if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                    break
 
-                # Ajoute la case à la zone d'explosion
+                tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
 
                 if tile == "M":
+                    # Détruit le mur et met à jour la carte
                     Block.Sol(new_x, new_y, self.size)
-                    self.map_data[new_y] = (
-                        self.map_data[new_y][:new_x]
-                        + " "
-                        + self.map_data[new_y][new_x + 1 :]
-                    )
+                    row = list(self.map_data[new_y])
+                    row[new_x] = " "
+                    self.map_data[new_y] = "".join(row)
                     break  # Arrête après avoir détruit le mur
                 elif tile in ["C", "E"]:
                     explosion_tiles.remove((new_x, new_y))
-                    break  # Arrête à l'obstacle
+                    break  # Arrête à l'obstacle indestructible
                 else:
                     Block.Sol(new_x, new_y, self.size)
 
@@ -302,35 +300,10 @@ class Explosion:
             player_pos = (int(self.player.x), int(self.player.y))
             if player_pos in explosion_tiles:
                 self.player.take_damage(1)
-                print(f"[DEBUG] Player hit by explosion at {player_pos}")
-            else:
-                print(f"[DEBUG] Player at {player_pos} safe from explosion")
-
-        print(f"[DEBUG] Explosion affected tiles: {explosion_tiles}")
-
-        # Call the function to replace destroyed walls
-        self.replace_destroyed_walls()
-
-    def _check_tile(self, x, y):
-        # Vérifie et traite la case donnée
-        if self.map_data[y][x] == "M":
-            Block.Sol(x, y, self.size)
-            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x + 1 :]
-        elif self.map_data[y][x] == "P" and self.player:
-            self.player.take_damage(1)
-        elif self.map_data[y][x] == "F":
-            Block.Sol(x, y, self.size)
-            self.map_data[y] = self.map_data[y][:x] + " " + self.map_data[y][x + 1 :]
 
     def replace_destroyed_walls(self):
-        for y in range(len(self.map_data)):
-            # Convert string to list
-            row = list(self.map_data[y])
-            for x in range(len(row)):
-                if row[x] == "M":
-                    row[x] = " "
-            # Join back to string
-            self.map_data[y] = "".join(row)
+        # Cette méthode n'est plus nécessaire car les murs sont correctement gérés dans damage()
+        pass
 
 
 class Player:
