@@ -396,8 +396,11 @@ class Player:
         return False
 
     def draw_hud(self):
+        # Texte du HUD
         hud_text = f"Vies:{self.lives:3d} | Bombes:{self.max_bombs - len(self.active_bombs):2d} | Timer:{self.tour:4d} | Score:{self.score:5d} | Niveau:{self.lvl:2d}"
+        # Dessine le fond du HUD
         g.dessinerRectangle(0, 0, 800, 40, "black")
+        # Affiche le texte du HUD
         g.afficherTexte(hud_text, 400, 20, "white", 16)
 
     def update_bombs(self, map_data):
