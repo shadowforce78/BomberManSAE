@@ -289,7 +289,6 @@ class Explosion:
                     row = list(self.map_data[new_y])
                     row[new_x] = " "
                     self.map_data[new_y] = "".join(row)
-                    break
                 elif tile in ["C", "E"]:
                     print(f"[DEBUG] Hit indestructible obstacle at ({new_x}, {new_y})")
                     explosion_tiles.remove((new_x, new_y))
@@ -321,7 +320,7 @@ class Player:
         self.lives = 3
         self.max_bombs = 1  # Maximum number of bombs player can place
         self.active_bombs = []  # List to store active bombs
-        self.bomb_range = 4
+        self.bomb_range = 4  # Changed from default value to 4
         self.speed = 1
         self.tour = 0
         self.sprite = None
