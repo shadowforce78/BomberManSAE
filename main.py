@@ -127,12 +127,11 @@ class Bomb:
         self.size = size
         self.player = player
         self.sprite = None
-        self.fuse_sprite = None  # Nouveau sprite pour la mèche
-        self.explosion_turn = player.tour + 5
-        print(
-            f"[DEBUG] New bomb placed at ({x},{y}), will explode at turn {self.explosion_turn}"
-        )
-        self.draw()  # Dessine la bombe immédiatement à la création
+        self.fuse_sprite = None
+        self.placed_at = player.timer # Stocke le timer au moment du placement
+        self.explosion_timer = self.placed_at - 5 # Explose quand le timer atteint cette valeur
+        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}")
+        self.draw()
 
     def draw(self):
         # Ne redessine que si les sprites n'existent pas
@@ -172,9 +171,9 @@ class Bomb:
             g.supprimer(self.fuse_sprite)
             self.fuse_sprite = None
 
-    def update(self, map_data, current_turn):
-        if current_turn >= self.explosion_turn:
-            print(f"[DEBUG] Bomb exploding at turn {current_turn}")
+    def update(self, map_data, current_timer):
+        if current_timer <= self.explosion_timer:  # Change la condition pour exploser quand le timer atteint la valeur cible
+            print(f"[DEBUG] Bomb exploding at timer {current_timer}")
             self.explode(map_data)
             return True
         return False
@@ -347,7 +346,7 @@ class Player:
         self.bomb_range = 4  # Distance des explosions par défaut
         self.lvl = 0
         self.speed = 1
-        self.tour = 0
+        self.timer = 0  # Sera initialisé avec la valeur du fichier
         self.sprite = None
         self.score = 0
 
@@ -398,7 +397,7 @@ class Player:
 
     def draw_hud(self):
         # Texte du HUD
-        hud_text = f"Vies:{self.lives:3d} | Bombes:{self.max_bombs - len(self.active_bombs):2d} | Timer:{self.tour:4d} | Score:{self.score:5d} | Niveau:{self.lvl:2d}"
+        hud_text = f"Vies:{self.lives:3d} | Bombes:{self.max_bombs - len(self.active_bombs):2d} | Timer:{self.timer:4d} | Score:{self.score:5d} | Niveau:{self.lvl:2d}"
         # Dessine le fond du HUD
         g.dessinerRectangle(0, 0, 800, 40, "black")
         # Affiche le texte du HUD
@@ -407,11 +406,11 @@ class Player:
     def update_bombs(self, map_data):
         if self.active_bombs:
             print(
-                f"[DEBUG] Updating {len(self.active_bombs)} active bombs at turn {self.tour}"
+                f"[DEBUG] Updating {len(self.active_bombs)} active bombs at timer {self.timer}"
             )
         bombs_to_remove = []
         for bomb in self.active_bombs:
-            if bomb.update(map_data, self.tour):
+            if bomb.update(map_data, self.timer):  # Changed from tour to timer
                 bombs_to_remove.append(bomb)
                 bomb.remove()
 
@@ -421,11 +420,26 @@ class Player:
                 b for b in self.active_bombs if b not in bombs_to_remove
             ]
 
+    def update_timer(self):
+        self.timer -= 1
+        if self.timer < 0:
+            print("[DEBUG] Time's up!")
+            g.afficherTexte("Time's Up!", 200, 200, "red", 32)
+            g.actualiser()
+            g.attendreClic()
+            g.fermerFenetre()
+
 
 def readmap1():
     players = []
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
+        
+    # Lecture des paramètres des deux premières lignes
+    time = int(map1[0].split()[1])
+    timerfantome = int(map1[1].split()[1])
+    print(f"[DEBUG] Time: {time}, Timer Fantome: {timerfantome}")
+
     for col in range(0, len(map1) - 3):
         mp = map1[col + 3].strip()
         print(repr(mp))
@@ -441,13 +455,13 @@ def readmap1():
                 Block.Sol(lig, col, L // BI)
             elif mp[lig] == "P":
                 player = Player(lig, col, L // BI)
+                player.timer = time  # Initialisation du timer avec la valeur lue
                 players.append(player)
                 player.draw()
-    return players, map1[3:]  # Retourne aussi les données de la carte
-
+    return players, map1[3:], time, timerfantome
 
 # Récupère les joueurs et la carte
-players, map_data = readmap1()
+players, map_data, time, timerfantome = readmap1()
 player = players[0]  # Le premier joueur
 
 # Boucle principale du jeu
@@ -463,22 +477,21 @@ while True:
         print(f"[DEBUG] Key pressed: {key}")
     if key == "Left":
         if player.move(-1, 0, map_data):
-            player.tour += 1
+            player.update_timer()
     elif key == "Right":
         if player.move(1, 0, map_data):
-            player.tour += 1
+            player.update_timer()
     elif key == "Up":
         if player.move(0, -1, map_data):
-            player.tour += 1
+            player.update_timer()
     elif key == "Down":
         if player.move(0, 1, map_data):
-            player.tour += 1
+            player.update_timer()
     elif key == "space":
         if len(player.active_bombs) < player.max_bombs:
             bomb = Bomb(player.x, player.y, player.size, player)
-            # Suppression de bomb.draw() ici car déjà appelé dans __init__
             player.active_bombs.append(bomb)
-            player.tour += 1
+            player.update_timer()
     elif key == "Escape":
         break
 
