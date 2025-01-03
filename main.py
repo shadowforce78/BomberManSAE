@@ -306,6 +306,8 @@ class Explosion:
                     row = list(self.map_data[new_y])
                     row[new_x] = " "
                     self.map_data[new_y] = "".join(row)
+                    if self.player:  # Add 1 to score for each wall destroyed
+                        self.player.score += 1
                     if walls_destroyed >= 4:  # Stop after destroying 4 walls
                         break
                 elif tile in ["C", "E"]:
@@ -342,6 +344,7 @@ class Player:
         self.max_bombs = 1  # Maximum number of bombs player can place
         self.active_bombs = []  # List to store active bombs
         self.bomb_range = 4  # Changed from default value to 4
+        self.lvl = 0
         self.speed = 1
         self.tour = 0
         self.sprite = None
@@ -394,8 +397,8 @@ class Player:
 
     def draw_hud(self):
         # Affiche l'ATH en haut à gauche avec des caractères ASCII
-        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Score: {self.score} | Tour: {self.tour}"
-        g.afficherTexte(hud_text, 200, 20, "white", 16)
+        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Score: {self.score} | Tour: {self.tour} | Niveau: {self.lvl}"
+        g.afficherTexte(hud_text, 250, 20, "white", 16)
 
     def update_bombs(self, map_data):
         if self.active_bombs:
@@ -447,7 +450,7 @@ player = players[0]  # Le premier joueur
 while True:
     # Efface l'ancien HUD avec un rectangle noir (fond)
     g.dessinerRectangle(
-        0, 0, 400, 40, "black"
+        0, 0, 530, 40, "black"
     )  # largeur changée de 300 à 400 pour s'assurer que tout le texte est visible
     # Affiche le nouveau HUD
     player.draw_hud()
