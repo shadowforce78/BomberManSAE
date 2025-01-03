@@ -264,12 +264,16 @@ class Explosion:
     def damage(self):
         # Créer une liste des cases touchées par l'explosion
         explosion_tiles = set()
+        destroyed_blocks = []  # Pour tracker les blocs détruits
 
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
+        print(f"[DEBUG] Starting explosion at ({self.x}, {self.y})")
         
         # Pour chaque direction
         for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+            direction_name = {(1,0): "droite", (-1,0): "gauche", (0,1): "bas", (0,-1): "haut"}
+            print(f"[DEBUG] Checking direction: {direction_name[(dx,dy)]}")
             max_range = self.get_explosion_range(dx, dy)
             
             for i in range(1, max_range + 1):
@@ -277,28 +281,37 @@ class Explosion:
                 new_y = self.y + dy * i
 
                 if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
+                    print(f"[DEBUG] Hit map boundary at ({new_x}, {new_y})")
                     break
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
+                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): {tile}")
 
                 if tile == "M":
                     # Détruit le mur et met à jour la carte
+                    print(f"[DEBUG] Destroying wall at ({new_x}, {new_y})")
+                    destroyed_blocks.append((new_x, new_y))
                     Block.Sol(new_x, new_y, self.size)
                     row = list(self.map_data[new_y])
                     row[new_x] = " "
                     self.map_data[new_y] = "".join(row)
-                    break  # Arrête après avoir détruit le mur
+                    break
                 elif tile in ["C", "E"]:
+                    print(f"[DEBUG] Hit indestructible obstacle at ({new_x}, {new_y})")
                     explosion_tiles.remove((new_x, new_y))
-                    break  # Arrête à l'obstacle indestructible
+                    break
                 else:
                     Block.Sol(new_x, new_y, self.size)
+
+        print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
+        print(f"[DEBUG] Destroyed blocks positions: {destroyed_blocks}")
 
         # Vérifie si le joueur est dans la zone d'explosion
         if self.player:
             player_pos = (int(self.player.x), int(self.player.y))
             if player_pos in explosion_tiles:
+                print(f"[DEBUG] Player hit at position {player_pos}")
                 self.player.take_damage(1)
 
     def replace_destroyed_walls(self):
