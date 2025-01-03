@@ -342,9 +342,9 @@ class Player:
         self.y = y
         self.size = size
         self.lives = 3
-        self.max_bombs = 1  # Maximum number of bombs player can place
-        self.active_bombs = []  # List to store active bombs
-        self.bomb_range = 4  # Changed from default value to 4
+        self.max_bombs = 1  # Maximum de bombes actives à la fois
+        self.active_bombs = []  # Pour stocker les bombes
+        self.bomb_range = 4  # Distance des explosions par défaut
         self.lvl = 0
         self.speed = 1
         self.tour = 0
