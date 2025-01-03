@@ -329,6 +329,7 @@ class Explosion:
             if player_pos in explosion_tiles:
                 print(f"[DEBUG] Player hit at position {player_pos}")
                 self.player.take_damage(1)
+                self.player.draw()  # Redraw the player to ensure it doesn't disappear
 
     def replace_destroyed_walls(self):
         # Cette méthode n'est plus nécessaire car les murs sont correctement gérés dans damage()
