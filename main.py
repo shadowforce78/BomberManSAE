@@ -397,7 +397,7 @@ class Player:
 
     def draw_hud(self):
         # Affiche l'ATH en haut à gauche avec des caractères ASCII
-        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Score: {self.score} | Tour: {self.tour} | Niveau: {self.lvl}"
+        hud_text = f"Vies: {self.lives} | Bombes: {self.max_bombs - len(self.active_bombs)} | Score: {self.score} | Niveau: {self.lvl}"
         g.afficherTexte(hud_text, 250, 20, "white", 16)
 
     def update_bombs(self, map_data):
