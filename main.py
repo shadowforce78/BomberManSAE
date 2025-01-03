@@ -211,24 +211,19 @@ class Explosion:
                     new_x = self.x + dx * i
                     new_y = self.y + dy * i
 
-                    if not (
-                        0 <= new_x < len(self.map_data[0])
-                        and 0 <= new_y < len(self.map_data)
-                    ):
+                    if not (0 <= new_x < len(self.map_data[0]) and 0 <= new_y < len(self.map_data)):
                         break
 
                     tile = self.map_data[new_y][new_x]
-                    if tile in ["C", "E"]:
-                        break
-
+                    
                     # Dessine l'animation sur chaque case affectée
                     center_x = new_x * self.size + self.size / 2
                     center_y = new_y * self.size + self.size / 2
                     sprite = g.dessinerDisque(center_x, center_y, self.size / 3, color)
                     self.sprites.append(sprite)
 
-                    # Si on touche un mur, on arrête dans cette direction
-                    if tile == "M":
+                    # Arrête seulement sur les obstacles indestructibles
+                    if tile in ["C", "E"]:
                         break
 
             g.actualiser()
@@ -262,9 +257,8 @@ class Explosion:
         return self.range
 
     def damage(self):
-        # Créer une liste des cases touchées par l'explosion
         explosion_tiles = set()
-        destroyed_blocks = []  # Pour tracker les blocs détruits
+        destroyed_blocks = []
 
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
@@ -286,10 +280,9 @@ class Explosion:
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
-                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): {tile}")
+                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}' ({'empty' if tile == ' ' else tile})")
 
                 if tile == "M":
-                    # Détruit le mur et met à jour la carte
                     print(f"[DEBUG] Destroying wall at ({new_x}, {new_y})")
                     destroyed_blocks.append((new_x, new_y))
                     Block.Sol(new_x, new_y, self.size)
@@ -302,6 +295,7 @@ class Explosion:
                     explosion_tiles.remove((new_x, new_y))
                     break
                 else:
+                    print(f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})")
                     Block.Sol(new_x, new_y, self.size)
 
         print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
