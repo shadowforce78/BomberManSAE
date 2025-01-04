@@ -7,6 +7,7 @@ import math
 L, H = 800, 800
 g = ouvrirFenetre(L, H)
 fantomes = []  # Liste globale des fantômes
+current_ghost_timer = 0  # Timer pour le spawn des fantômes
 
 # un mur (M)
 # une colonne (C)
@@ -195,6 +196,7 @@ class Explosion:
         self.map_data = map_data
         self.player = player
         self.sprites = []  # Liste pour stocker les sprites d'animation
+        self.ghost_tiles = set()  # Ajout d'un set pour suivre les positions des fantômes touchés
         self.damage()  # Do damage first
         self.animate()  # Then animate the results
 
@@ -271,6 +273,7 @@ class Explosion:
     def damage(self):
         explosion_tiles = set()
         destroyed_blocks = []
+        ghosts_to_destroy = []  # Liste des fantômes à détruire
 
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
@@ -297,6 +300,12 @@ class Explosion:
                 ):
                     print(f"[DEBUG] Hit map boundary at ({new_x}, {new_y})")
                     break
+
+                # Vérifie les fantômes à cette position
+                for ghost in list(fantomes):  # Utilise une copie de la liste pour éviter les problèmes de modification pendant l'itération
+                    if ghost.visible and int(ghost.x) == new_x and int(ghost.y) == new_y:
+                        print(f"[DEBUG] Ghost #{ghost.id} caught in explosion at ({new_x}, {new_y})")
+                        ghosts_to_destroy.append(ghost)
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
@@ -325,6 +334,13 @@ class Explosion:
                         f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})"
                     )
                     Block.Sol(new_x, new_y, self.size)
+
+        # Détruit tous les fantômes touchés
+        for ghost in ghosts_to_destroy:
+            ghost.destroy()
+            if self.player:  # Ajoute des points pour chaque fantôme détruit
+                self.player.score += 5  # Plus de points que pour un mur
+                print(f"[DEBUG] Player scored 5 points for destroying ghost #{ghost.id}")
 
         print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
         print(f"[DEBUG] Destroyed blocks positions: {destroyed_blocks}")
@@ -457,6 +473,9 @@ class Fantome:
         self.last_pos = None  # Pour éviter de revenir en arrière
         self.visible = False  # État de visibilité du fantôme
         self.next_apparition = 0  # Prochain timer d'apparition
+        self.has_moved = False  # Nouvel attribut pour suivre si le fantôme a bougé ce tour
+        self.id = len(fantomes)  # Ajouter un identifiant unique
+        print(f"[DEBUG] Created ghost #{self.id} at position ({x}, {y})")
 
     def draw(self):
         if self.sprite:
@@ -468,19 +487,23 @@ class Fantome:
                 self.size/2,
                 "purple"
             )
+            print(f"[DEBUG] Ghost #{self.id} drawn at ({self.x}, {self.y})")
 
     def hide(self):
         if self.sprite:
             g.supprimer(self.sprite)
             self.sprite = None
+            print(f"[DEBUG] Ghost #{self.id} hidden")
         self.visible = False
         
     def show(self):
         self.visible = True
+        print(f"[DEBUG] Ghost #{self.id} shown")
         self.draw()
 
     def get_available_moves(self, map_data):
         moves = []
+        print(f"[DEBUG] Ghost #{self.id} checking available moves from ({self.x}, {self.y})")
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_x = int(self.x + dx)
             new_y = int(self.y + dy)
@@ -491,52 +514,84 @@ class Fantome:
                 map_data[new_y][new_x] not in ["M", "C", "E"] and
                 (new_x, new_y) != self.last_pos):
                 
-                # Vérifie si la case est occupée par un autre fantôme
+                # Vérifie si la case est occupée par un autre fantôme visible
                 occupied = False
                 for f in fantomes:
-                    if f != self and int(f.x) == new_x and int(f.y) == new_y:
+                    if (f != self and f.visible and 
+                        int(f.x) == new_x and int(f.y) == new_y):
+                        print(f"[DEBUG] Ghost #{self.id} found position ({new_x}, {new_y}) occupied by Ghost #{f.id}")
                         occupied = True
                         break
                 
                 if not occupied:
                     moves.append((dx, dy))
+                    print(f"[DEBUG] Ghost #{self.id} found valid move to ({new_x}, {new_y})")
         
+        print(f"[DEBUG] Ghost #{self.id} has {len(moves)} possible moves")
         return moves
 
     def move(self, map_data):
-        if not self.visible:  # Ne bouge pas si invisible
+        if not self.visible or self.has_moved:  # Ne bouge pas si invisible ou déjà bougé
+            if not self.visible:
+                print(f"[DEBUG] Ghost #{self.id} is invisible, skipping move")
+            if self.has_moved:
+                print(f"[DEBUG] Ghost #{self.id} has already moved this turn")
             return
 
         # Vérifie si un joueur est adjacent
         for player in players:
             if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
+                print(f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})")
                 return  # Le fantôme reste immobile s'il est adjacent au joueur
 
         # Obtient les mouvements possibles
         moves = self.get_available_moves(map_data)
         
         if moves:
+            # Dessine le sol à l'ancienne position
+            Block.Sol(int(self.x), int(self.y), self.size)
+            
             # Choisit un mouvement aléatoire
             dx, dy = random.choice(moves)
-            self.last_pos = (self.x, self.y)  # Sauvegarde la position actuelle
+            old_pos = (self.x, self.y)
+            self.last_pos = old_pos  # Sauvegarde la position actuelle
             self.x += dx
             self.y += dy
+            self.has_moved = True  # Marque le fantôme comme ayant bougé
+            print(f"[DEBUG] Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})")
             self.draw()
+        else:
+            print(f"[DEBUG] Ghost #{self.id} has no valid moves available")
+
+    def destroy(self):
+        """Détruit le fantôme et le retire du jeu"""
+        print(f"[DEBUG] Ghost #{self.id} destroyed")
+        if self.sprite:
+            g.supprimer(self.sprite)
+            self.sprite = None
+        self.visible = False
+        try:
+            fantomes.remove(self)
+        except ValueError:
+            print(f"[DEBUG] Ghost #{self.id} already removed")
 
 
 def readmap1():
     players = []
-    global fantomes  # Utilise la liste globale des fantômes
-    fantomes = []    # Réinitialise la liste
+    global fantomes, current_ghost_timer
+    fantomes = []
     
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
 
-    # Lecture des paramètres des deux premières lignes
+    # Lecture des paramètres
     time = int(map1[0].split()[1])
     timerfantome = int(map1[1].split()[1])
+    current_ghost_timer = timerfantome  # Initialisation du timer
     print(f"[DEBUG] Time: {time}, Timer Fantome: {timerfantome}")
 
+    # Premier passage : charge la carte et repère les prises ethernet
+    ethernet_positions = []
     for col in range(0, len(map1) - 3):
         mp = map1[col + 3].strip()
         print(repr(mp))
@@ -548,21 +603,36 @@ def readmap1():
                 Block.Mur(lig, col, L // BI)
             elif mp[lig] == "E":
                 Block.Ethernet(lig, col, L // BI)
-                # Crée un fantôme sur la prise ethernet
-                fantome = Fantome(lig, col, L // BI)
-                fantomes.append(fantome)
+                ethernet_positions.append((lig, col))
             elif mp[lig] == " ":
                 Block.Sol(lig, col, L // BI)
             elif mp[lig] == "P":
                 player = Player(lig, col, L // BI)
-                player.timer = time  # Initialisation du timer avec la valeur lue
+                player.timer = time
                 players.append(player)
                 player.draw()
-    return players, map1[3:], time, timerfantome
 
+    # Au lieu de créer directement les fantômes, on va juste stocker les positions disponibles
+    ghost_spawn_positions = []
+    for x, y in ethernet_positions:
+        for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            new_x, new_y = x + dx, y + dy
+            if (0 <= new_x < len(map1[3].strip()) and 
+                0 <= new_y < len(map1) - 3 and 
+                map1[new_y + 3][new_x] == " "):
+                ghost_spawn_positions.append((new_x, new_y, L // BI))
+
+    # Création des deux premiers fantômes si possible
+    if len(ghost_spawn_positions) >= 2:
+        positions = random.sample(ghost_spawn_positions, 2)
+        for x, y, size in positions:
+            fantome = Fantome(x, y, size)
+            fantomes.append(fantome)
+
+    return players, map1[3:], time, timerfantome, ghost_spawn_positions
 
 # Récupère les joueurs et la carte
-players, map_data, time, timerfantome = readmap1()
+players, map_data, time, timerfantome, ghost_spawn_positions = readmap1()
 player = players[0]  # Le premier joueur
 
 # Boucle principale du jeu
@@ -600,18 +670,34 @@ while True:
     player.update_bombs(map_data)
 
     # Gestion des fantômes
-    if player.timer % timerfantome == 0:  # Moment d'apparition/disparition
+    if current_ghost_timer <= 0:  # Le timer est arrivé à zéro
+        print("\n[DEBUG] === Ghost Spawn Cycle ===")
+        print(f"[DEBUG] Current active ghosts: {len(fantomes)}")
+        
+        # Création de deux nouveaux fantômes
+        if len(ghost_spawn_positions) >= 2:
+            positions = random.sample(ghost_spawn_positions, 2)
+            for x, y, size in positions:
+                fantome = Fantome(x, y, size)
+                fantome.show()  # Le rendre visible immédiatement
+                fantomes.append(fantome)
+                print(f"[DEBUG] Spawned new ghost #{fantome.id} at ({x}, {y})")
+        
+        current_ghost_timer = timerfantome  # Réinitialise le timer
+        print(f"[DEBUG] Ghost timer reset to {timerfantome}")
+        print(f"Global timer: {player.timer}")
+        print("[DEBUG] === End Spawn Cycle ===\n")
+    
+    # Décrémenter le timer des fantômes si une action est effectuée
+    if key:
+        current_ghost_timer -= 1
+        print(f"[DEBUG] Ghost timer: {current_ghost_timer}")
+        
+        # Déplacement des fantômes
         for fantome in fantomes:
             if fantome.visible:
-                fantome.hide()  # Cache les fantômes visibles
-            else:
-                Block.Ethernet(int(fantome.x), int(fantome.y), fantome.size)  # Redessine la prise ethernet
-                fantome.show()  # Montre les fantômes cachés
-
-    # Déplacement des fantômes à chaque tour s'ils sont visibles
-    for fantome in fantomes:
-        if fantome.visible:
-            fantome.move(map_data)
+                fantome.has_moved = False
+                fantome.move(map_data)
 
     # Rafraîchit l'affichage
     g.actualiser()
