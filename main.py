@@ -6,6 +6,7 @@ import math
 # ouverture de fenêtre
 L, H = 800, 800
 g = ouvrirFenetre(L, H)
+fantomes = []  # Liste globale des fantômes
 
 # un mur (M)
 # une colonne (C)
@@ -392,12 +393,15 @@ class Player:
             g.fermerFenetre()
 
     def can_move(self, dx, dy, map_data):
-        # Calcule la nouvelle position
         new_x = self.x + dx
         new_y = self.y + dy
 
-        # Vérifie si la nouvelle position est dans les limites et n'est pas un mur/colonne
+        # Vérifie si la nouvelle position est dans les limites et n'est pas un obstacle
         if 0 <= new_x < len(map_data[0]) and 0 <= new_y < len(map_data):
+            # Vérifie s'il y a un fantôme à la nouvelle position
+            for fantome in fantomes:
+                if int(fantome.x) == int(new_x) and int(fantome.y) == int(new_y):
+                    return False
             return map_data[int(new_y)][int(new_x)] not in ["M", "C", "E"]
         return False
 
@@ -438,7 +442,7 @@ class Player:
 
 class Fantome:
 
-    #     Les fantômes se déplacent une case par tour sur des cases non bloquantes.
+    # Les fantômes se déplacent une case par tour sur des cases non bloquantes.
     # Si un Bomber est adjacent, le fantôme ne bouge pas (il attend pour attaquer).
     # Les déplacements respectent ces règles :
     # Aucune case voisine disponible : Le fantôme reste immobile.
@@ -450,10 +454,81 @@ class Fantome:
         self.y = y
         self.size = size
         self.sprite = None
+        self.last_pos = None  # Pour éviter de revenir en arrière
+        self.visible = False  # État de visibilité du fantôme
+        self.next_apparition = 0  # Prochain timer d'apparition
+
+    def draw(self):
+        if self.sprite:
+            g.supprimer(self.sprite)
+        if self.visible:  # Dessine seulement si visible
+            self.sprite = g.dessinerDisque(
+                self.x * self.size + self.size/2,
+                self.y * self.size + self.size/2,
+                self.size/2,
+                "purple"
+            )
+
+    def hide(self):
+        if self.sprite:
+            g.supprimer(self.sprite)
+            self.sprite = None
+        self.visible = False
+        
+    def show(self):
+        self.visible = True
+        self.draw()
+
+    def get_available_moves(self, map_data):
+        moves = []
+        for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
+            new_x = int(self.x + dx)
+            new_y = int(self.y + dy)
+            
+            # Vérifie si la nouvelle position est valide
+            if (0 <= new_x < len(map_data[0]) and 
+                0 <= new_y < len(map_data) and 
+                map_data[new_y][new_x] not in ["M", "C", "E"] and
+                (new_x, new_y) != self.last_pos):
+                
+                # Vérifie si la case est occupée par un autre fantôme
+                occupied = False
+                for f in fantomes:
+                    if f != self and int(f.x) == new_x and int(f.y) == new_y:
+                        occupied = True
+                        break
+                
+                if not occupied:
+                    moves.append((dx, dy))
+        
+        return moves
+
+    def move(self, map_data):
+        if not self.visible:  # Ne bouge pas si invisible
+            return
+
+        # Vérifie si un joueur est adjacent
+        for player in players:
+            if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
+                return  # Le fantôme reste immobile s'il est adjacent au joueur
+
+        # Obtient les mouvements possibles
+        moves = self.get_available_moves(map_data)
+        
+        if moves:
+            # Choisit un mouvement aléatoire
+            dx, dy = random.choice(moves)
+            self.last_pos = (self.x, self.y)  # Sauvegarde la position actuelle
+            self.x += dx
+            self.y += dy
+            self.draw()
 
 
 def readmap1():
     players = []
+    global fantomes  # Utilise la liste globale des fantômes
+    fantomes = []    # Réinitialise la liste
+    
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
 
@@ -473,6 +548,9 @@ def readmap1():
                 Block.Mur(lig, col, L // BI)
             elif mp[lig] == "E":
                 Block.Ethernet(lig, col, L // BI)
+                # Crée un fantôme sur la prise ethernet
+                fantome = Fantome(lig, col, L // BI)
+                fantomes.append(fantome)
             elif mp[lig] == " ":
                 Block.Sol(lig, col, L // BI)
             elif mp[lig] == "P":
@@ -520,6 +598,20 @@ while True:
 
     # Gestion des bombes
     player.update_bombs(map_data)
+
+    # Gestion des fantômes
+    if player.timer % timerfantome == 0:  # Moment d'apparition/disparition
+        for fantome in fantomes:
+            if fantome.visible:
+                fantome.hide()  # Cache les fantômes visibles
+            else:
+                Block.Ethernet(int(fantome.x), int(fantome.y), fantome.size)  # Redessine la prise ethernet
+                fantome.show()  # Montre les fantômes cachés
+
+    # Déplacement des fantômes à chaque tour s'ils sont visibles
+    for fantome in fantomes:
+        if fantome.visible:
+            fantome.move(map_data)
 
     # Rafraîchit l'affichage
     g.actualiser()
