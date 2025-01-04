@@ -128,9 +128,13 @@ class Bomb:
         self.player = player
         self.sprite = None
         self.fuse_sprite = None
-        self.placed_at = player.timer # Stocke le timer au moment du placement
-        self.explosion_timer = self.placed_at - 5 # Explose quand le timer atteint cette valeur
-        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}")
+        self.placed_at = player.timer  # Stocke le timer au moment du placement
+        self.explosion_timer = (
+            self.placed_at - 5
+        )  # Explose quand le timer atteint cette valeur
+        print(
+            f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}"
+        )
         self.draw()
 
     def draw(self):
@@ -172,7 +176,9 @@ class Bomb:
             self.fuse_sprite = None
 
     def update(self, map_data, current_timer):
-        if current_timer <= self.explosion_timer:  # Change la condition pour exploser quand le timer atteint la valeur cible
+        if (
+            current_timer <= self.explosion_timer
+        ):  # Change la condition pour exploser quand le timer atteint la valeur cible
             print(f"[DEBUG] Bomb exploding at timer {current_timer}")
             self.explode(map_data)
             return True
@@ -430,11 +436,27 @@ class Player:
             g.fermerFenetre()
 
 
+class Fantome:
+
+    #     Les fantômes se déplacent une case par tour sur des cases non bloquantes.
+    # Si un Bomber est adjacent, le fantôme ne bouge pas (il attend pour attaquer).
+    # Les déplacements respectent ces règles :
+    # Aucune case voisine disponible : Le fantôme reste immobile.
+    # Une seule case disponible : Le fantôme s'y déplace.
+    # Plusieurs cases disponibles : Une case est choisie aléatoirement, en excluant la case occupée au tour précédent (évite les retours inutiles).
+
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.sprite = None
+
+
 def readmap1():
     players = []
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
-        
+
     # Lecture des paramètres des deux premières lignes
     time = int(map1[0].split()[1])
     timerfantome = int(map1[1].split()[1])
@@ -459,6 +481,7 @@ def readmap1():
                 players.append(player)
                 player.draw()
     return players, map1[3:], time, timerfantome
+
 
 # Récupère les joueurs et la carte
 players, map_data, time, timerfantome = readmap1()
