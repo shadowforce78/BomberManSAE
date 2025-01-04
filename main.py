@@ -248,9 +248,6 @@ class Explosion:
             for sprite in current_sprites:
                 g.supprimer(sprite)
 
-    def draw(self):
-        pass  # Plus besoin de cette méthode
-
     def get_explosion_range(self, dx, dy):
         """Calcule la portée effective de l'explosion dans une direction donnée"""
         for i in range(1, self.range + 1):
@@ -352,10 +349,6 @@ class Explosion:
                 print(f"[DEBUG] Player hit at position {player_pos}")
                 self.player.take_damage(1)
                 self.player.draw()  # Redraw the player to ensure it doesn't disappear
-
-    def replace_destroyed_walls(self):
-        # Cette méthode n'est plus nécessaire car les murs sont correctement gérés dans damage()
-        pass
 
 
 class Player:
