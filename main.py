@@ -140,25 +140,23 @@ class Bomb:
         self.draw()
 
     def draw(self):
-        # Ne redessine que si les sprites n'existent pas
-        if not self.sprite:
-            # Position centrale de la bombe
-            center_x = self.x * self.size + self.size / 2
-            center_y = self.y * self.size + self.size / 2
+        # Position centrale de la bombe
+        center_x = self.x * self.size + self.size / 2
+        center_y = self.y * self.size + self.size / 2
 
-            # Dessine le corps de la bombe (cercle noir)
-            self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2.5, "black")
+        # Dessine le corps de la bombe (cercle noir)
+        self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2.5, "black")
 
-            # Dessine la mèche de la bombe (petit rectangle blanc)
-            fuse_width = self.size / 6
-            fuse_height = self.size / 3
-            self.fuse_sprite = g.dessinerRectangle(
-                center_x - fuse_width / 2,
-                center_y - fuse_height,
-                fuse_width,
-                fuse_height,
-                "white",
-            )
+        # Dessine la mèche de la bombe (petit rectangle blanc)
+        fuse_width = self.size / 6
+        fuse_height = self.size / 3
+        self.fuse_sprite = g.dessinerRectangle(
+            center_x - fuse_width / 2,
+            center_y - fuse_height,
+            fuse_width,
+            fuse_height,
+            "white",
+        )
 
     def explode(self, map_data):
         print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
@@ -178,12 +176,14 @@ class Bomb:
             self.fuse_sprite = None
 
     def update(self, map_data, current_timer):
-        if (
-            current_timer <= self.explosion_timer
-        ):  # Change la condition pour exploser quand le timer atteint la valeur cible
+        if current_timer <= self.explosion_timer:
             print(f"[DEBUG] Bomb exploding at timer {current_timer}")
-            self.explode(map_data)
+            self.remove()  # D'abord on supprime les sprites de la bombe
+            self.explode(map_data)  # Ensuite on crée l'explosion
             return True
+        else:
+            # On redessine la bombe uniquement si elle n'a pas encore explosé
+            self.draw()
         return False
 
 
