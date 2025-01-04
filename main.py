@@ -365,6 +365,7 @@ class Player:
         self.timer = 0  # Sera initialisé avec la valeur du fichier
         self.sprite = None
         self.score = 0
+        self.last_collision_check = 0  # Nouveau: pour suivre le dernier check de collision
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -447,6 +448,20 @@ class Player:
             g.actualiser()
             g.attendreClic()
             g.fermerFenetre()
+
+    def check_ghost_collision(self):
+        """Vérifie si un fantôme est adjacent au joueur et inflige des dégâts si c'est le cas"""
+        # Ne vérifie qu'une fois par tour
+        if self.last_collision_check == self.timer:
+            return False
+            
+        self.last_collision_check = self.timer
+        for fantome in fantomes:
+            if fantome.visible and abs(self.x - fantome.x) <= 1 and abs(self.y - fantome.y) <= 1:
+                print(f"[DEBUG] Player adjacent to ghost #{fantome.id}")
+                self.take_damage(1)
+                return True
+        return False
 
 
 class Fantome:
@@ -655,20 +670,25 @@ while True:
     if key == "Left":
         if player.move(-1, 0, map_data):
             player.update_timer()
+            player.check_ghost_collision()  # Vérifie les collisions après chaque mouvement
     elif key == "Right":
         if player.move(1, 0, map_data):
             player.update_timer()
+            player.check_ghost_collision()
     elif key == "Up":
         if player.move(0, -1, map_data):
             player.update_timer()
+            player.check_ghost_collision()
     elif key == "Down":
         if player.move(0, 1, map_data):
             player.update_timer()
+            player.check_ghost_collision()
     elif key == "space":
         if len(player.active_bombs) < player.max_bombs:
             bomb = Bomb(player.x, player.y, player.size, player)
             player.active_bombs.append(bomb)
             player.update_timer()
+            player.check_ghost_collision()
     elif key == "Escape":
         break
 
