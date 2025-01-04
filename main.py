@@ -475,6 +475,7 @@ class Fantome:
         self.next_apparition = 0  # Prochain timer d'apparition
         self.has_moved = False  # Nouvel attribut pour suivre si le fantôme a bougé ce tour
         self.id = len(fantomes)  # Ajouter un identifiant unique
+        self.blocked_turns = 0  # Compteur de tours bloqués
         print(f"[DEBUG] Created ghost #{self.id} at position ({x}, {y})")
 
     def draw(self):
@@ -558,10 +559,22 @@ class Fantome:
             self.x += dx
             self.y += dy
             self.has_moved = True  # Marque le fantôme comme ayant bougé
+            self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
             print(f"[DEBUG] Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})")
             self.draw()
         else:
-            print(f"[DEBUG] Ghost #{self.id} has no valid moves available")
+            self.blocked_turns += 1
+            print(f"[DEBUG] Ghost #{self.id} has no valid moves available, blocked for {self.blocked_turns} turns")
+            if self.blocked_turns > 2:
+                # Permet au fantôme de reculer
+                if self.last_pos:
+                    Block.Sol(int(self.x), int(self.y), self.size)
+                    self.x, self.y = self.last_pos
+                    self.last_pos = None  # Réinitialise la dernière position pour éviter les boucles infinies
+                    self.has_moved = True
+                    self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
+                    print(f"[DEBUG] Ghost #{self.id} moved back to ({self.x}, {self.y})")
+                    self.draw()
 
     def destroy(self):
         """Détruit le fantôme et le retire du jeu"""
