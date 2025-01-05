@@ -729,30 +729,27 @@ while True:
     # Gestion des mouvements
     if key:  # Seulement si une touche est pressée
         print(f"[DEBUG] Key pressed: {key}")
-    if key == "Left":
-        if player.move(-1, 0, map_data):
+        action_performed = False  # Flag to check if an action was performed
+
+        if key == "Left":
+            action_performed = player.move(-1, 0, map_data)
+        elif key == "Right":
+            action_performed = player.move(1, 0, map_data)
+        elif key == "Up":
+            action_performed = player.move(0, -1, map_data)
+        elif key == "Down":
+            action_performed = player.move(0, 1, map_data)
+        elif key == "space":
+            if len(player.active_bombs) < player.max_bombs:
+                bomb = Bomb(player.x, player.y, player.size, player)
+                player.active_bombs.append(bomb)
+                action_performed = True
+        elif key == "Escape":
+            break
+
+        if action_performed:
             player.update_timer()
             player.check_ghost_collision()  # Vérifie les collisions après chaque mouvement
-    elif key == "Right":
-        if player.move(1, 0, map_data):
-            player.update_timer()
-            player.check_ghost_collision()
-    elif key == "Up":
-        if player.move(0, -1, map_data):
-            player.update_timer()
-            player.check_ghost_collision()
-    elif key == "Down":
-        if player.move(0, 1, map_data):
-            player.update_timer()
-            player.check_ghost_collision()
-    elif key == "space":
-        if len(player.active_bombs) < player.max_bombs:
-            bomb = Bomb(player.x, player.y, player.size, player)
-            player.active_bombs.append(bomb)
-            player.update_timer()
-            player.check_ghost_collision()
-    elif key == "Escape":
-        break
 
     # Gestion des bombes
     player.update_bombs(map_data)
@@ -777,7 +774,7 @@ while True:
         print("[DEBUG] === End Spawn Cycle ===\n")
 
     # Décrémenter le timer des fantômes si une action est effectuée
-    if key:
+    if key and action_performed:
         current_ghost_timer -= 1
         print(f"[DEBUG] Ghost timer: {current_ghost_timer}")
 
