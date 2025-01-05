@@ -683,7 +683,6 @@ def readmap():
     current_ghost_timer = timerfantome  # Initialisation du timer
     print(f"[DEBUG] Time: {time}, Timer Fantome: {timerfantome}")
 
-    # Premier passage : charge la carte et repère les prises ethernet
     ethernet_positions = []
     for col in range(0, len(map1) - 3):
         mp = map1[col + 3].strip()
@@ -705,7 +704,6 @@ def readmap():
                 players.append(player)
                 player.draw()
 
-    # Au lieu de créer directement les fantômes, on va juste stocker les positions disponibles
     ghost_spawn_positions = []
     for x, y in ethernet_positions:
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
