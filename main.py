@@ -279,8 +279,9 @@ class Explosion:
         print(f"[DEBUG] Starting explosion at ({self.x}, {self.y})")
 
         # Pour chaque direction
-        for dx, dy in [(1, 0), (-1, 0), (0, 1), (0, -1)]:
+        for dx, dy in [(0,0),(1, 0), (-1, 0), (0, 1), (0, -1)]:
             direction_name = {
+                (0, 0): "centre",
                 (1, 0): "droite",
                 (-1, 0): "gauche",
                 (0, 1): "bas",
