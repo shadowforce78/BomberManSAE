@@ -19,6 +19,7 @@ current_ghost_timer = 0  # Timer pour le spawn des fantômes
 # une bombe (B)
 # une explosion (X)
 
+
 class Block:
     def __init__(self, x, y, c):
         self.x = x
@@ -40,29 +41,86 @@ class Block:
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
         g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
         g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(x * c + (c // 2), y * c + (c // 3.5), x * c + (c // 2), y * c + (c // 2), "darkred")
-        g.dessinerLigne(x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred")
-        g.dessinerLigne(x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred")
-        g.dessinerLigne(x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred")
-        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 2), x * c + (c // 3.5), y * c + (c // 1.3), "darkred")
-        g.dessinerLigne(x * c + (c // 1.3), y * c + (c // 2), x * c + (c // 1.3), y * c + (c // 1.3), "darkred")
+        g.dessinerLigne(
+            x * c + (c // 2),
+            y * c + (c // 3.5),
+            x * c + (c // 2),
+            y * c + (c // 2),
+            "darkred",
+        )
+        g.dessinerLigne(
+            x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 2),
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            "darkred",
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3),
+            y * c + (c // 2),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "darkred",
+        )
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
-        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred")
-        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred")
+        g.dessinerLigne(
+            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred"
+        )
+        g.dessinerLigne(
+            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred"
+        )
 
     def Sol(x, y, c):
         g.dessinerRectangle(x * c, y * c, c, c, "tan")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "brown")
-        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown")
-        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown")
+        g.dessinerLigne(
+            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown"
+        )
+        g.dessinerLigne(
+            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown"
+        )
 
     def Ethernet(x, y, c):
         g.dessinerRectangle(x * c, y * c, c, c, "BlanchedAlmond")
-        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 3.5), y * c + (c // 1.3), "black")
-        g.dessinerLigne(x * c + (c // 1.3), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 1.3), "black")
-        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 3.5), "black")
-        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 1.3), x * c + (c // 1.3), y * c + (c // 1.3), "black")
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 3.5),
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 1.3),
+            y * c + (c // 3.5),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 3.5),
+            x * c + (c // 1.3),
+            y * c + (c // 3.5),
+            "black",
+        )
+        g.dessinerLigne(
+            x * c + (c // 3.5),
+            y * c + (c // 1.3),
+            x * c + (c // 1.3),
+            y * c + (c // 1.3),
+            "black",
+        )
+
 
 class Bomb:
     def __init__(self, x, y, size, player):
@@ -73,8 +131,12 @@ class Bomb:
         self.sprite = None
         self.fuse_sprite = None
         self.placed_at = player.timer  # Stocke le timer au moment du placement
-        self.explosion_timer = self.placed_at - 5  # Explose quand le timer atteint cette valeur
-        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}")
+        self.explosion_timer = (
+            self.placed_at - 5
+        )  # Explose quand le timer atteint cette valeur
+        print(
+            f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}"
+        )
         self.draw()
 
     def draw(self):
@@ -124,6 +186,7 @@ class Bomb:
             self.draw()
         return False
 
+
 class Explosion:
     def __init__(self, x, y, size, range, map_data, player=None):
         self.x = x
@@ -133,7 +196,9 @@ class Explosion:
         self.map_data = map_data
         self.player = player
         self.sprites = []  # Liste pour stocker les sprites d'animation
-        self.ghost_tiles = set()  # Ajout d'un set pour suivre les positions des fantômes touchés
+        self.ghost_tiles = (
+            set()
+        )  # Ajout d'un set pour suivre les positions des fantômes touchés
         self.damage()  # Do damage first
         self.animate()  # Then animate the results
 
@@ -236,9 +301,17 @@ class Explosion:
                     break
 
                 # Vérifie les fantômes à cette position
-                for ghost in list(fantomes):  # Utilise une copie de la liste pour éviter les problèmes de modification pendant l'itération
-                    if ghost.visible and int(ghost.x) == new_x and int(ghost.y) == new_y:
-                        print(f"[DEBUG] Ghost #{ghost.id} caught in explosion at ({new_x}, {new_y})")
+                for ghost in list(
+                    fantomes
+                ):  # Utilise une copie de la liste pour éviter les problèmes de modification pendant l'itération
+                    if (
+                        ghost.visible
+                        and int(ghost.x) == new_x
+                        and int(ghost.y) == new_y
+                    ):
+                        print(
+                            f"[DEBUG] Ghost #{ghost.id} caught in explosion at ({new_x}, {new_y})"
+                        )
                         ghosts_to_destroy.append(ghost)
 
                 tile = self.map_data[new_y][new_x]
@@ -274,7 +347,9 @@ class Explosion:
             ghost.destroy()
             if self.player:  # Ajoute des points pour chaque fantôme détruit
                 self.player.score += 5  # Plus de points que pour un mur
-                print(f"[DEBUG] Player scored 5 points for destroying ghost #{ghost.id}")
+                print(
+                    f"[DEBUG] Player scored 5 points for destroying ghost #{ghost.id}"
+                )
 
         print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
         print(f"[DEBUG] Destroyed blocks positions: {destroyed_blocks}")
@@ -286,6 +361,7 @@ class Explosion:
                 print(f"[DEBUG] Player hit at position {player_pos}")
                 self.player.take_damage(1)
                 self.player.draw()  # Redraw the player to ensure it doesn't disappear
+
 
 class Player:
     def __init__(self, x, y, size):
@@ -301,7 +377,9 @@ class Player:
         self.timer = 0  # Sera initialisé avec la valeur du fichier
         self.sprite = None
         self.score = 0
-        self.last_collision_check = 0  # Nouveau: pour suivre le dernier check de collision
+        self.last_collision_check = (
+            0  # Nouveau: pour suivre le dernier check de collision
+        )
 
     def draw(self):
         # Efface l'ancien sprite si il existe
@@ -390,14 +468,19 @@ class Player:
         # Ne vérifie qu'une fois par tour
         if self.last_collision_check == self.timer:
             return False
-            
+
         self.last_collision_check = self.timer
         for fantome in fantomes:
-            if fantome.visible and abs(self.x - fantome.x) <= 1 and abs(self.y - fantome.y) <= 1:
+            if (
+                fantome.visible
+                and abs(self.x - fantome.x) <= 1
+                and abs(self.y - fantome.y) <= 1
+            ):
                 print(f"[DEBUG] Player adjacent to ghost #{fantome.id}")
                 self.take_damage(1)
                 return True
         return False
+
 
 class Fantome:
 
@@ -416,7 +499,9 @@ class Fantome:
         self.last_pos = None  # Pour éviter de revenir en arrière
         self.visible = False  # État de visibilité du fantôme
         self.next_apparition = 0  # Prochain timer d'apparition
-        self.has_moved = False  # Nouvel attribut pour suivre si le fantôme a bougé ce tour
+        self.has_moved = (
+            False  # Nouvel attribut pour suivre si le fantôme a bougé ce tour
+        )
         self.id = len(fantomes)  # Ajouter un identifiant unique
         self.blocked_turns = 0  # Compteur de tours bloqués
         print(f"[DEBUG] Created ghost #{self.id} at position ({x}, {y})")
@@ -426,10 +511,10 @@ class Fantome:
             g.supprimer(self.sprite)
         if self.visible:  # Dessine seulement si visible
             self.sprite = g.dessinerDisque(
-                self.x * self.size + self.size/2,
-                self.y * self.size + self.size/2,
-                self.size/2,
-                "purple"
+                self.x * self.size + self.size / 2,
+                self.y * self.size + self.size / 2,
+                self.size / 2,
+                "purple",
             )
             print(f"[DEBUG] Ghost #{self.id} drawn at ({self.x}, {self.y})")
 
@@ -439,7 +524,7 @@ class Fantome:
             self.sprite = None
             print(f"[DEBUG] Ghost #{self.id} hidden")
         self.visible = False
-        
+
     def show(self):
         self.visible = True
         print(f"[DEBUG] Ghost #{self.id} shown")
@@ -447,35 +532,49 @@ class Fantome:
 
     def get_available_moves(self, map_data):
         moves = []
-        print(f"[DEBUG] Ghost #{self.id} checking available moves from ({self.x}, {self.y})")
+        print(
+            f"[DEBUG] Ghost #{self.id} checking available moves from ({self.x}, {self.y})"
+        )
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_x = int(self.x + dx)
             new_y = int(self.y + dy)
-            
+
             # Vérifie si la nouvelle position est valide
-            if (0 <= new_x < len(map_data[0]) and 
-                0 <= new_y < len(map_data) and 
-                map_data[new_y][new_x] not in ["M", "C", "E"] and
-                (new_x, new_y) != self.last_pos):
-                
+            if (
+                0 <= new_x < len(map_data[0])
+                and 0 <= new_y < len(map_data)
+                and map_data[new_y][new_x] not in ["M", "C", "E"]
+                and (new_x, new_y) != self.last_pos
+            ):
+
                 # Vérifie si la case est occupée par un autre fantôme visible
                 occupied = False
                 for f in fantomes:
-                    if (f != self and f.visible and 
-                        int(f.x) == new_x and int(f.y) == new_y):
-                        print(f"[DEBUG] Ghost #{self.id} found position ({new_x}, {new_y}) occupied by Ghost #{f.id}")
+                    if (
+                        f != self
+                        and f.visible
+                        and int(f.x) == new_x
+                        and int(f.y) == new_y
+                    ):
+                        print(
+                            f"[DEBUG] Ghost #{self.id} found position ({new_x}, {new_y}) occupied by Ghost #{f.id}"
+                        )
                         occupied = True
                         break
-                
+
                 if not occupied:
                     moves.append((dx, dy))
-                    print(f"[DEBUG] Ghost #{self.id} found valid move to ({new_x}, {new_y})")
-        
+                    print(
+                        f"[DEBUG] Ghost #{self.id} found valid move to ({new_x}, {new_y})"
+                    )
+
         print(f"[DEBUG] Ghost #{self.id} has {len(moves)} possible moves")
         return moves
 
     def move(self, map_data):
-        if not self.visible or self.has_moved:  # Ne bouge pas si invisible ou déjà bougé
+        if (
+            not self.visible or self.has_moved
+        ):  # Ne bouge pas si invisible ou déjà bougé
             if not self.visible:
                 print(f"[DEBUG] Ghost #{self.id} is invisible, skipping move")
             if self.has_moved:
@@ -485,16 +584,18 @@ class Fantome:
         # Vérifie si un joueur est adjacent
         for player in players:
             if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
-                print(f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})")
+                print(
+                    f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})"
+                )
                 return  # Le fantôme reste immobile s'il est adjacent au joueur
 
         # Obtient les mouvements possibles
         moves = self.get_available_moves(map_data)
-        
+
         if moves:
             # Dessine le sol à l'ancienne position
             Block.Sol(int(self.x), int(self.y), self.size)
-            
+
             # Choisit un mouvement aléatoire
             dx, dy = random.choice(moves)
             old_pos = (self.x, self.y)
@@ -503,11 +604,15 @@ class Fantome:
             self.y += dy
             self.has_moved = True  # Marque le fantôme comme ayant bougé
             self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
-            print(f"[DEBUG] Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})")
+            print(
+                f"[DEBUG] Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})"
+            )
             self.draw()
         else:
             self.blocked_turns += 1
-            print(f"[DEBUG] Ghost #{self.id} has no valid moves available, blocked for {self.blocked_turns} turns")
+            print(
+                f"[DEBUG] Ghost #{self.id} has no valid moves available, blocked for {self.blocked_turns} turns"
+            )
             if self.blocked_turns > 2:
                 # Permet au fantôme de reculer
                 if self.last_pos:
@@ -516,7 +621,9 @@ class Fantome:
                     self.last_pos = None  # Réinitialise la dernière position pour éviter les boucles infinies
                     self.has_moved = True
                     self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
-                    print(f"[DEBUG] Ghost #{self.id} moved back to ({self.x}, {self.y})")
+                    print(
+                        f"[DEBUG] Ghost #{self.id} moved back to ({self.x}, {self.y})"
+                    )
                     self.draw()
 
     def destroy(self):
@@ -531,11 +638,12 @@ class Fantome:
         except ValueError:
             print(f"[DEBUG] Ghost #{self.id} already removed")
 
+
 def readmap1():
     players = []
     global fantomes, current_ghost_timer
     fantomes = []
-    
+
     with open("map0.txt", "r") as file:
         map1 = file.readlines()
 
@@ -572,9 +680,11 @@ def readmap1():
     for x, y in ethernet_positions:
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_x, new_y = x + dx, y + dy
-            if (0 <= new_x < len(map1[3].strip()) and 
-                0 <= new_y < len(map1) - 3 and 
-                map1[new_y + 3][new_x] == " "):
+            if (
+                0 <= new_x < len(map1[3].strip())
+                and 0 <= new_y < len(map1) - 3
+                and map1[new_y + 3][new_x] == " "
+            ):
                 ghost_spawn_positions.append((new_x, new_y, L // BI))
 
     # Création des deux premiers fantômes si possible
@@ -585,6 +695,7 @@ def readmap1():
             fantomes.append(fantome)
 
     return players, map1[3:], time, timerfantome, ghost_spawn_positions
+
 
 # Récupère les joueurs et la carte
 players, map_data, time, timerfantome, ghost_spawn_positions = readmap1()
@@ -633,7 +744,7 @@ while True:
     if current_ghost_timer <= 0:  # Le timer est arrivé à zéro
         print("\n[DEBUG] === Ghost Spawn Cycle ===")
         print(f"[DEBUG] Current active ghosts: {len(fantomes)}")
-        
+
         # Création de deux nouveaux fantômes
         if len(ghost_spawn_positions) >= 2:
             positions = random.sample(ghost_spawn_positions, 2)
@@ -642,17 +753,17 @@ while True:
                 fantome.show()  # Le rendre visible immédiatement
                 fantomes.append(fantome)
                 print(f"[DEBUG] Spawned new ghost #{fantome.id} at ({x}, {y})")
-        
+
         current_ghost_timer = timerfantome  # Réinitialise le timer
         print(f"[DEBUG] Ghost timer reset to {timerfantome}")
         print(f"Global timer: {player.timer}")
         print("[DEBUG] === End Spawn Cycle ===\n")
-    
+
     # Décrémenter le timer des fantômes si une action est effectuée
     if key:
         current_ghost_timer -= 1
         print(f"[DEBUG] Ghost timer: {current_ghost_timer}")
-        
+
         # Déplacement des fantômes
         for fantome in fantomes:
             if fantome.visible:
