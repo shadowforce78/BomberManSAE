@@ -279,7 +279,7 @@ class Explosion:
         print(f"[DEBUG] Starting explosion at ({self.x}, {self.y})")
 
         # Pour chaque direction
-        for dx, dy in [(0,0),(1, 0), (-1, 0), (0, 1), (0, -1)]:
+        for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
             direction_name = {
                 (0, 0): "centre",
                 (1, 0): "droite",
@@ -383,13 +383,29 @@ class Player:
         )
 
     def draw(self):
-        # Efface l'ancien sprite si il existe
+        # Efface l'ancien sprite s'il existe
         if self.sprite:
             g.supprimer(self.sprite)
-        # Crée le nouveau sprite
-        self.sprite = g.dessinerRectangle(
-            self.x * self.size, self.y * self.size, self.size, self.size, "Yellow"
-        )
+        # Crée le nouveau sprite avec plus de détails
+        center_x = self.x * self.size + self.size / 2
+        center_y = self.y * self.size + self.size / 2
+        # Corps du joueur
+        self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2, "Yellow")
+        # Yeux du joueur
+        eye_radius = self.size / 10
+        eye_offset_x = self.size / 6
+        eye_offset_y = self.size / 6
+        g.dessinerDisque(center_x - eye_offset_x, center_y - eye_offset_y, eye_radius, "Black")
+        g.dessinerDisque(center_x + eye_offset_x, center_y - eye_offset_y, eye_radius, "Black")
+        # # Bouche du joueur
+        mouth_width = self.size / 3
+        mouth_height = self.size / 10
+        # Dessine la bouche du joueur (arc de cercle)
+        mouth_start_x = center_x - mouth_width / 2
+        mouth_end_x = center_x + mouth_width / 2
+        mouth_y = center_y + self.size / 6
+        g.dessinerLigne(mouth_start_x, mouth_y, center_x, mouth_y + mouth_height, "Black")
+        g.dessinerLigne(center_x, mouth_y + mouth_height, mouth_end_x, mouth_y, "Black")
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
