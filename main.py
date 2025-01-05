@@ -369,7 +369,7 @@ class Player:
         self.lives = 3
         self.max_bombs = 1  # Maximum de bombes actives à la fois
         self.active_bombs = []  # Pour stocker les bombes
-        self.bomb_range = 4  # Distance des explosions par défaut
+        self.bomb_range = 3  # Distance des explosions par défaut
         self.lvl = 0
         self.speed = 1
         self.timer = 0  # Sera initialisé avec la valeur du fichier
