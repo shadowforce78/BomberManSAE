@@ -532,6 +532,7 @@ class Fantome:
         )
         self.id = len(fantomes)  # Ajouter un identifiant unique
         self.blocked_turns = 0  # Compteur de tours bloqués
+        self.just_attacked = False  # New attribute to track attack state
         print(f"[DEBUG] Created ghost #{self.id} at position ({x}, {y})")
 
     def draw(self):
@@ -609,6 +610,12 @@ class Fantome:
                 print(f"[DEBUG] Ghost #{self.id} has already moved this turn")
             return
 
+        # Si le fantôme vient d'attaquer, il ne peut pas bouger ce tour
+        if self.just_attacked:
+            print(f"[DEBUG] Ghost #{self.id} cooling down after attack")
+            self.just_attacked = False  # Reset pour le prochain tour
+            return
+
         # Vérifie si un joueur est adjacent (horizontalement ou verticalement)
         for player in players:
             if (abs(self.x - player.x) == 1 and self.y == player.y) or (
@@ -617,7 +624,9 @@ class Fantome:
                 print(
                     f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})"
                 )
-                return  # Le fantôme reste immobile s'il est adjacent au joueur
+                # Marque le fantôme comme ayant attaqué pour le prochain tour
+                self.just_attacked = True
+                return
 
         # Obtient les mouvements possibles
         moves = self.get_available_moves(map_data)
