@@ -3,6 +3,13 @@ from tkiteasy import *
 import random
 import math
 
+# Configuration globale
+DEBUG_MODE = False  # Variable pour activer/désactiver les prints de debug
+
+def debug_print(*args, **kwargs):
+    if DEBUG_MODE:
+        print(*args, **kwargs)
+
 # ouverture de fenêtre
 L, H = 800, 800
 g = ouvrirFenetre(L, H)
@@ -134,9 +141,7 @@ class Bomb:
         self.explosion_timer = (
             self.placed_at - 5
         )  # Explose quand le timer atteint cette valeur
-        print(
-            f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}"
-        )
+        debug_print(f"New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}")
         self.draw()
 
     def draw(self):
@@ -159,14 +164,14 @@ class Bomb:
         )
 
     def explode(self, map_data):
-        print(f"[DEBUG] Bomb exploding at ({self.x},{self.y})")
+        debug_print(f"Bomb exploding at ({self.x},{self.y})")
         # Passe la référence du joueur à l'explosion
         Explosion(
             self.x, self.y, self.size, self.player.bomb_range, map_data, self.player
         )
 
     def remove(self):
-        print(f"[DEBUG] Removing bomb sprite at ({self.x},{self.y})")
+        debug_print(f"Removing bomb sprite at ({self.x},{self.y})")
         # Efface les deux sprites
         if self.sprite:
             g.supprimer(self.sprite)
@@ -177,7 +182,7 @@ class Bomb:
 
     def update(self, map_data, current_timer):
         if current_timer <= self.explosion_timer:
-            print(f"[DEBUG] Bomb exploding at timer {current_timer}")
+            debug_print(f"Bomb exploding at timer {current_timer}")
             self.remove()  # D'abord on supprime les sprites de la bombe
             self.explode(map_data)  # Ensuite on crée l'explosion
             return True
@@ -276,7 +281,7 @@ class Explosion:
 
         # Ajoute la case centrale
         explosion_tiles.add((self.x, self.y))
-        print(f"[DEBUG] Starting explosion at ({self.x}, {self.y})")
+        debug_print(f"Starting explosion at ({self.x}, {self.y})")
 
         # Pour chaque direction
         for dx, dy in [(0, 0), (1, 0), (-1, 0), (0, 1), (0, -1)]:
@@ -287,7 +292,7 @@ class Explosion:
                 (0, 1): "bas",
                 (0, -1): "haut",
             }
-            print(f"[DEBUG] Checking direction: {direction_name[(dx,dy)]}")
+            debug_print(f"Checking direction: {direction_name[(dx,dy)]}")
             walls_destroyed = 0  # Compteur de murs détruits dans cette direction
 
             for i in range(1, self.range + 1):
@@ -298,7 +303,7 @@ class Explosion:
                     0 <= new_x < len(self.map_data[0])
                     and 0 <= new_y < len(self.map_data)
                 ):
-                    print(f"[DEBUG] Hit map boundary at ({new_x}, {new_y})")
+                    debug_print(f"Hit map boundary at ({new_x}, {new_y})")
                     break
 
                 # Vérifie les fantômes à cette position
@@ -310,20 +315,16 @@ class Explosion:
                         and int(ghost.x) == new_x
                         and int(ghost.y) == new_y
                     ):
-                        print(
-                            f"[DEBUG] Ghost #{ghost.id} caught in explosion at ({new_x}, {new_y})"
-                        )
+                        debug_print(f"Ghost #{ghost.id} caught in explosion at ({new_x}, {new_y})")
                         ghosts_to_destroy.append(ghost)
 
                 tile = self.map_data[new_y][new_x]
                 explosion_tiles.add((new_x, new_y))
-                print(f"[DEBUG] Checking tile at ({new_x}, {new_y}): '{tile}'")
+                debug_print(f"Checking tile at ({new_x}, {new_y}): '{tile}'")
 
                 if tile == "M":
                     walls_destroyed += 1
-                    print(
-                        f"[DEBUG] Destroying wall at ({new_x}, {new_y}). Wall count: {walls_destroyed}"
-                    )
+                    debug_print(f"Destroying wall at ({new_x}, {new_y}). Wall count: {walls_destroyed}")
                     destroyed_blocks.append((new_x, new_y))
                     Block.Sol(new_x, new_y, self.size)
                     row = list(self.map_data[new_y])
@@ -334,13 +335,11 @@ class Explosion:
                     if walls_destroyed >= 4:  # Stop after destroying 4 walls
                         break
                 elif tile in ["C", "E"]:
-                    print(f"[DEBUG] Hit indestructible obstacle at ({new_x}, {new_y})")
+                    debug_print(f"Hit indestructible obstacle at ({new_x}, {new_y})")
                     explosion_tiles.remove((new_x, new_y))
                     break
                 else:
-                    print(
-                        f"[DEBUG] Explosion continues through empty space at ({new_x}, {new_y})"
-                    )
+                    debug_print(f"Explosion continues through empty space at ({new_x}, {new_y})")
                     Block.Sol(new_x, new_y, self.size)
 
         # Détruit tous les fantômes touchés
@@ -348,18 +347,16 @@ class Explosion:
             ghost.destroy()
             if self.player:  # Ajoute des points pour chaque fantôme détruit
                 self.player.score += 5  # Plus de points que pour un mur
-                print(
-                    f"[DEBUG] Player scored 5 points for destroying ghost #{ghost.id}"
-                )
+                debug_print(f"Player scored 5 points for destroying ghost #{ghost.id}")
 
-        print(f"[DEBUG] Total blocks destroyed: {len(destroyed_blocks)}")
-        print(f"[DEBUG] Destroyed blocks positions: {destroyed_blocks}")
+        debug_print(f"Total blocks destroyed: {len(destroyed_blocks)}")
+        debug_print(f"Destroyed blocks positions: {destroyed_blocks}")
 
         # Check player damage
         if self.player:
             player_pos = (int(self.player.x), int(self.player.y))
             if player_pos in explosion_tiles:
-                print(f"[DEBUG] Player hit at position {player_pos}")
+                debug_print(f"Player hit at position {player_pos}")
                 self.player.take_damage(1)
                 self.player.draw()  # Redraw the player to ensure it doesn't disappear
 
@@ -420,9 +417,7 @@ class Player:
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
-            print(
-                f"[DEBUG] Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})"
-            )
+            debug_print(f"Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})")
             self.x += dx
             self.y += dy
             # Redessine le sol à l'ancienne position
@@ -430,15 +425,15 @@ class Player:
             # Redessine le joueur à la nouvelle position
             self.draw()
             return True
-        print(f"[DEBUG] Movement blocked at ({self.x+dx},{self.y+dy})")
+        debug_print(f"Movement blocked at ({self.x+dx},{self.y+dy})")
         return False
 
     def take_damage(self, amount):
-        print(f"[DEBUG] Player taking {amount} damage. Lives before: {self.lives}")
+        debug_print(f"Player taking {amount} damage. Lives before: {self.lives}")
         self.lives -= amount
-        print(f"[DEBUG] Lives after: {self.lives}")
+        debug_print(f"Lives after: {self.lives}")
         if self.lives < 1:
-            print("[DEBUG] Game Over triggered")
+            debug_print("Game Over triggered")
             g.afficherTexte("Game Over", 200, 200, "red", 32)
             g.actualiser()
             g.attendreClic()
@@ -467,9 +462,7 @@ class Player:
 
     def update_bombs(self, map_data):
         if self.active_bombs:
-            print(
-                f"[DEBUG] Updating {len(self.active_bombs)} active bombs at timer {self.timer}"
-            )
+            debug_print(f"Updating {len(self.active_bombs)} active bombs at timer {self.timer}")
         bombs_to_remove = []
         for bomb in self.active_bombs:
             if bomb.update(map_data, self.timer):  # Changed from tour to timer
@@ -477,7 +470,7 @@ class Player:
                 bomb.remove()
 
         if bombs_to_remove:
-            print(f"[DEBUG] Removing {len(bombs_to_remove)} exploded bombs")
+            debug_print(f"Removing {len(bombs_to_remove)} exploded bombs")
             self.active_bombs = [
                 b for b in self.active_bombs if b not in bombs_to_remove
             ]
@@ -485,7 +478,7 @@ class Player:
     def update_timer(self):
         self.timer -= 1
         if self.timer < 0:
-            print("[DEBUG] Time's up!")
+            debug_print("Time's up!")
             g.afficherTexte("Time's Up!", 200, 200, "red", 32)
             g.actualiser()
             g.attendreClic()
@@ -504,7 +497,7 @@ class Player:
                 and abs(self.x - fantome.x) <= 1
                 and abs(self.y - fantome.y) <= 1
             ):
-                print(f"[DEBUG] Player adjacent to ghost #{fantome.id}")
+                debug_print(f"Player adjacent to ghost #{fantome.id}")
                 self.take_damage(1)
                 return True
         return False
@@ -533,7 +526,7 @@ class Fantome:
         self.id = len(fantomes)  # Ajouter un identifiant unique
         self.blocked_turns = 0  # Compteur de tours bloqués
         self.just_attacked = False  # New attribute to track attack state
-        print(f"[DEBUG] Created ghost #{self.id} at position ({x}, {y})")
+        debug_print(f"Created ghost #{self.id} at position ({x}, {y})")
 
     def draw(self):
         if self.sprite:
@@ -545,25 +538,23 @@ class Fantome:
                 self.size / 2,
                 "purple",
             )
-            print(f"[DEBUG] Ghost #{self.id} drawn at ({self.x}, {self.y})")
+            debug_print(f"Ghost #{self.id} drawn at ({self.x}, {self.y})")
 
     def hide(self):
         if self.sprite:
             g.supprimer(self.sprite)
             self.sprite = None
-            print(f"[DEBUG] Ghost #{self.id} hidden")
+            debug_print(f"Ghost #{self.id} hidden")
         self.visible = False
 
     def show(self):
         self.visible = True
-        print(f"[DEBUG] Ghost #{self.id} shown")
+        debug_print(f"Ghost #{self.id} shown")
         self.draw()
 
     def get_available_moves(self, map_data):
         moves = []
-        print(
-            f"[DEBUG] Ghost #{self.id} checking available moves from ({self.x}, {self.y})"
-        )
+        debug_print(f"Ghost #{self.id} checking available moves from ({self.x}, {self.y})")
         for dx, dy in [(0, 1), (0, -1), (1, 0), (-1, 0)]:
             new_x = int(self.x + dx)
             new_y = int(self.y + dy)
@@ -585,19 +576,15 @@ class Fantome:
                         and int(f.x) == new_x
                         and int(f.y) == new_y
                     ):
-                        print(
-                            f"[DEBUG] Ghost #{self.id} found position ({new_x}, {new_y}) occupied by Ghost #{f.id}"
-                        )
+                        debug_print(f"Ghost #{self.id} found position ({new_x}, {new_y}) occupied by Ghost #{f.id}")
                         occupied = True
                         break
 
                 if not occupied:
                     moves.append((dx, dy))
-                    print(
-                        f"[DEBUG] Ghost #{self.id} found valid move to ({new_x}, {new_y})"
-                    )
+                    debug_print(f"Ghost #{self.id} found valid move to ({new_x}, {new_y})")
 
-        print(f"[DEBUG] Ghost #{self.id} has {len(moves)} possible moves")
+        debug_print(f"Ghost #{self.id} has {len(moves)} possible moves")
         return moves
 
     def move(self, map_data):
@@ -605,14 +592,14 @@ class Fantome:
             not self.visible or self.has_moved
         ):  # Ne bouge pas si invisible ou déjà bougé
             if not self.visible:
-                print(f"[DEBUG] Ghost #{self.id} is invisible, skipping move")
+                debug_print(f"Ghost #{self.id} is invisible, skipping move")
             if self.has_moved:
-                print(f"[DEBUG] Ghost #{self.id} has already moved this turn")
+                debug_print(f"Ghost #{self.id} has already moved this turn")
             return
 
         # Si le fantôme vient d'attaquer, il ne peut pas bouger ce tour
         if self.just_attacked:
-            print(f"[DEBUG] Ghost #{self.id} cooling down after attack")
+            debug_print(f"Ghost #{self.id} cooling down after attack")
             self.just_attacked = False  # Reset pour le prochain tour
             return
 
@@ -621,9 +608,7 @@ class Fantome:
             if (abs(self.x - player.x) == 1 and self.y == player.y) or (
                 abs(self.y - player.y) == 1 and self.x == player.x
             ):
-                print(
-                    f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})"
-                )
+                debug_print(f"Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})")
                 # Marque le fantôme comme ayant attaqué pour le prochain tour
                 self.just_attacked = True
                 return
@@ -643,15 +628,11 @@ class Fantome:
             self.y += dy
             self.has_moved = True  # Marque le fantôme comme ayant bougé
             self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
-            print(
-                f"[DEBUG] Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})"
-            )
+            debug_print(f"Ghost #{self.id} moved from {old_pos} to ({self.x}, {self.y})")
             self.draw()
         else:
             self.blocked_turns += 1
-            print(
-                f"[DEBUG] Ghost #{self.id} has no valid moves available, blocked for {self.blocked_turns} turns"
-            )
+            debug_print(f"Ghost #{self.id} has no valid moves available, blocked for {self.blocked_turns} turns")
             if self.blocked_turns > 2:
                 # Permet au fantôme de reculer
                 if self.last_pos:
@@ -660,14 +641,12 @@ class Fantome:
                     self.last_pos = None  # Réinitialise la dernière position pour éviter les boucles infinies
                     self.has_moved = True
                     self.blocked_turns = 0  # Réinitialise le compteur de tours bloqués
-                    print(
-                        f"[DEBUG] Ghost #{self.id} moved back to ({self.x}, {self.y})"
-                    )
+                    debug_print(f"Ghost #{self.id} moved back to ({self.x}, {self.y})")
                     self.draw()
 
     def destroy(self):
         """Détruit le fantôme et le retire du jeu"""
-        print(f"[DEBUG] Ghost #{self.id} destroyed")
+        debug_print(f"Ghost #{self.id} destroyed")
         if self.sprite:
             g.supprimer(self.sprite)
             self.sprite = None
@@ -675,7 +654,7 @@ class Fantome:
         try:
             fantomes.remove(self)
         except ValueError:
-            print(f"[DEBUG] Ghost #{self.id} already removed")
+            debug_print(f"Ghost #{self.id} already removed")
 
 
 def readmap():
@@ -690,12 +669,12 @@ def readmap():
     time = int(map1[0].split()[1])
     timerfantome = int(map1[1].split()[1])
     current_ghost_timer = timerfantome  # Initialisation du timer
-    print(f"[DEBUG] Time: {time}, Timer Fantome: {timerfantome}")
+    debug_print(f"Time: {time}, Timer Fantome: {timerfantome}")
 
     ethernet_positions = []
     for col in range(0, len(map1) - 3):
         mp = map1[col + 3].strip()
-        print(repr(mp))
+        debug_print(repr(mp))
         BI = len(mp)
         for lig in range(0, len(mp)):
             if mp[lig] == "C":
@@ -748,7 +727,7 @@ while True:
 
     # Gestion des mouvements
     if key:  # Seulement si une touche est pressée
-        print(f"[DEBUG] Key pressed: {key}")
+        debug_print(f"Key pressed: {key}")
         action_performed = False  # Flag to check if an action was performed
 
         if key == "Left":
@@ -776,8 +755,8 @@ while True:
 
     # Gestion des fantômes
     if current_ghost_timer <= 0:  # Le timer est arrivé à zéro
-        print("\n[DEBUG] === Ghost Spawn Cycle ===")
-        print(f"[DEBUG] Current active ghosts: {len(fantomes)}")
+        debug_print("\n=== Ghost Spawn Cycle ===")
+        debug_print(f"Current active ghosts: {len(fantomes)}")
 
         # Création de deux nouveaux fantômes
         if len(ghost_spawn_positions) >= 2:
@@ -786,17 +765,17 @@ while True:
                 fantome = Fantome(x, y, size)
                 fantome.show()  # Le rendre visible immédiatement
                 fantomes.append(fantome)
-                print(f"[DEBUG] Spawned new ghost #{fantome.id} at ({x}, {y})")
+                debug_print(f"Spawned new ghost #{fantome.id} at ({x}, {y})")
 
         current_ghost_timer = timerfantome  # Réinitialise le timer
-        print(f"[DEBUG] Ghost timer reset to {timerfantome}")
-        print(f"Global timer: {player.timer}")
-        print("[DEBUG] === End Spawn Cycle ===\n")
+        debug_print(f"Ghost timer reset to {timerfantome}")
+        debug_print(f"Global timer: {player.timer}")
+        debug_print("=== End Spawn Cycle ===\n")
 
     # Décrémenter le timer des fantômes si une action est effectuée
     if key and action_performed:
         current_ghost_timer -= 1
-        print(f"[DEBUG] Ghost timer: {current_ghost_timer}")
+        debug_print(f"Ghost timer: {current_ghost_timer}")
 
         # Déplacement des fantômes
         for fantome in fantomes:
