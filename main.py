@@ -19,7 +19,6 @@ current_ghost_timer = 0  # Timer pour le spawn des fantômes
 # une bombe (B)
 # une explosion (X)
 
-
 class Block:
     def __init__(self, x, y, c):
         self.x = x
@@ -41,86 +40,29 @@ class Block:
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
         g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
         g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(
-            x * c + (c // 2),
-            y * c + (c // 3.5),
-            x * c + (c // 2),
-            y * c + (c // 2),
-            "darkred",
-        )
-        g.dessinerLigne(
-            x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 2),
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            "darkred",
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3),
-            y * c + (c // 2),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "darkred",
-        )
+        g.dessinerLigne(x * c + (c // 2), y * c + (c // 3.5), x * c + (c // 2), y * c + (c // 2), "darkred")
+        g.dessinerLigne(x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred")
+        g.dessinerLigne(x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 2), x * c + (c // 3.5), y * c + (c // 1.3), "darkred")
+        g.dessinerLigne(x * c + (c // 1.3), y * c + (c // 2), x * c + (c // 1.3), y * c + (c // 1.3), "darkred")
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
-        g.dessinerLigne(
-            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred"
-        )  # in process of renovation
+        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred")
+        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred")
 
     def Sol(x, y, c):
         g.dessinerRectangle(x * c, y * c, c, c, "tan")
         g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
         g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "brown")
-        g.dessinerLigne(
-            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown"
-        )
-        g.dessinerLigne(
-            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown"
-        )
+        g.dessinerLigne(x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown")
+        g.dessinerLigne(x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown")
 
     def Ethernet(x, y, c):
         g.dessinerRectangle(x * c, y * c, c, c, "BlanchedAlmond")
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 3.5),
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3),
-            y * c + (c // 3.5),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 3.5),
-            x * c + (c // 1.3),
-            y * c + (c // 3.5),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "black",
-        )
-
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 3.5), y * c + (c // 1.3), "black")
+        g.dessinerLigne(x * c + (c // 1.3), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 1.3), "black")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 3.5), x * c + (c // 1.3), y * c + (c // 3.5), "black")
+        g.dessinerLigne(x * c + (c // 3.5), y * c + (c // 1.3), x * c + (c // 1.3), y * c + (c // 1.3), "black")
 
 class Bomb:
     def __init__(self, x, y, size, player):
@@ -131,12 +73,8 @@ class Bomb:
         self.sprite = None
         self.fuse_sprite = None
         self.placed_at = player.timer  # Stocke le timer au moment du placement
-        self.explosion_timer = (
-            self.placed_at - 5
-        )  # Explose quand le timer atteint cette valeur
-        print(
-            f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}"
-        )
+        self.explosion_timer = self.placed_at - 5  # Explose quand le timer atteint cette valeur
+        print(f"[DEBUG] New bomb placed at ({x},{y}), will explode at timer {self.explosion_timer}")
         self.draw()
 
     def draw(self):
@@ -185,7 +123,6 @@ class Bomb:
             # On redessine la bombe uniquement si elle n'a pas encore explosé
             self.draw()
         return False
-
 
 class Explosion:
     def __init__(self, x, y, size, range, map_data, player=None):
@@ -350,7 +287,6 @@ class Explosion:
                 self.player.take_damage(1)
                 self.player.draw()  # Redraw the player to ensure it doesn't disappear
 
-
 class Player:
     def __init__(self, x, y, size):
         self.x = x
@@ -462,7 +398,6 @@ class Player:
                 self.take_damage(1)
                 return True
         return False
-
 
 class Fantome:
 
@@ -595,7 +530,6 @@ class Fantome:
             fantomes.remove(self)
         except ValueError:
             print(f"[DEBUG] Ghost #{self.id} already removed")
-
 
 def readmap1():
     players = []
