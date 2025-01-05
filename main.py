@@ -403,9 +403,20 @@ class Player:
         mouth_width = self.size / 3
         mouth_height = self.size / 10
         mouth_y = center_y + eye_offset
-        g.dessinerLigne(center_x - mouth_width / 2, mouth_y, center_x, mouth_y + mouth_height, "Black")
-        g.dessinerLigne(center_x, mouth_y + mouth_height, center_x + mouth_width / 2, mouth_y, "Black")
-
+        g.dessinerLigne(
+            center_x - mouth_width / 2,
+            mouth_y,
+            center_x,
+            mouth_y + mouth_height,
+            "Black",
+        )
+        g.dessinerLigne(
+            center_x,
+            mouth_y + mouth_height,
+            center_x + mouth_width / 2,
+            mouth_y,
+            "Black",
+        )
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
@@ -426,7 +437,7 @@ class Player:
         print(f"[DEBUG] Player taking {amount} damage. Lives before: {self.lives}")
         self.lives -= amount
         print(f"[DEBUG] Lives after: {self.lives}")
-        if self.lives <= 0:
+        if self.lives < 1:
             print("[DEBUG] Game Over triggered")
             g.afficherTexte("Game Over", 200, 200, "red", 32)
             g.actualiser()
@@ -598,9 +609,11 @@ class Fantome:
                 print(f"[DEBUG] Ghost #{self.id} has already moved this turn")
             return
 
-        # Vérifie si un joueur est adjacent
+        # Vérifie si un joueur est adjacent (horizontalement ou verticalement)
         for player in players:
-            if abs(self.x - player.x) <= 1 and abs(self.y - player.y) <= 1:
+            if (abs(self.x - player.x) == 1 and self.y == player.y) or (
+                abs(self.y - player.y) == 1 and self.x == player.x
+            ):
                 print(
                     f"[DEBUG] Ghost #{self.id} stays still - player adjacent at ({player.x}, {player.y})"
                 )
@@ -656,7 +669,7 @@ class Fantome:
             print(f"[DEBUG] Ghost #{self.id} already removed")
 
 
-def readmap1():
+def readmap():
     players = []
     global fantomes, current_ghost_timer
     fantomes = []
@@ -715,7 +728,7 @@ def readmap1():
 
 
 # Récupère les joueurs et la carte
-players, map_data, time, timerfantome, ghost_spawn_positions = readmap1()
+players, map_data, time, timerfantome, ghost_spawn_positions = readmap()
 player = players[0]  # Le premier joueur
 
 # Boucle principale du jeu
