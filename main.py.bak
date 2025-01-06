@@ -735,111 +735,77 @@ def readmap():
 players, map_data, time, timerfantome, ghost_spawn_positions = readmap()
 player = players[0]  # Le premier joueur
 
-class InputHandler:
-    def __init__(self, game_window):
-        self.game_window = game_window
-        
-    def handle_input(self, player, map_data):
-        key = self.game_window.recupererTouche()
-        if not key:
-            return False
-            
-        debug_print(f"Key pressed: {key}")
-        action_performed = False
+# Boucle principale du jeu
+while True:
+    # Affiche le nouveau HUD
+    player.draw_hud()
 
-        if key == "Escape":
-            return None  # Signal to quit game
-            
-        action_map = {
-            "Left": (-1, 0),
-            "Right": (1, 0),
-            "Up": (0, -1),
-            "Down": (0, 1)
-        }
-        
-        if key in action_map:
-            dx, dy = action_map[key]
-            action_performed = player.move(dx, dy, map_data)
+    # Récupère la touche pressée
+    key = g.recupererTouche()
+
+    # Gestion des mouvements
+    if key:  # Seulement si une touche est pressée
+        debug_print(f"Key pressed: {key}")
+        action_performed = False  # Flag to check if an action was performed
+
+        if key == "Left":
+            action_performed = player.move(-1, 0, map_data)
+        elif key == "Right":
+            action_performed = player.move(1, 0, map_data)
+        elif key == "Up":
+            action_performed = player.move(0, -1, map_data)
+        elif key == "Down":
+            action_performed = player.move(0, 1, map_data)
         elif key == "space":
             if len(player.active_bombs) < player.max_bombs:
                 bomb = Bomb(player.x, player.y, player.size, player)
                 player.active_bombs.append(bomb)
                 action_performed = True
-                
-        return action_performed
+        elif key == "Escape":
+            break
 
-class GameEngine:
-    def __init__(self, game_window, map_file="map0.txt"):
-        self.game_window = game_window
-        self.input_handler = InputHandler(game_window)
-        self.players, self.map_data, self.time, self.ghost_timer, self.ghost_spawn_positions = readmap()
-        self.player = self.players[0]
-        self.current_ghost_timer = self.ghost_timer
-        self.running = True
-
-    def update(self):
-        # Affichage HUD
-        self.player.draw_hud()
-
-        # Gestion des entrées
-        action_performed = self.input_handler.handle_input(self.player, self.map_data)
-        
-        if action_performed is None:  # Signal de sortie
-            self.running = False
-            return
-            
         if action_performed:
-            self.handle_turn_actions()
+            player.update_timer()
+            player.check_ghost_collision()  # Vérifie les collisions après chaque mouvement
+            player.check_score_level()  # Vérifie si le score permet de monter de niveau
 
-        # Mise à jour des éléments de jeu
-        self.player.update_bombs(self.map_data)
-        self.manage_ghosts(action_performed)
-        
-        # Rafraîchissement
-        self.game_window.actualiser()
-        self.game_window.pause(0.05)
+    # Gestion des bombes
+    player.update_bombs(map_data)
 
-    def handle_turn_actions(self):
-        self.player.update_timer()
-        self.player.check_ghost_collision()
-        self.player.check_score_level()
-
-    def manage_ghosts(self, action_performed):
-        if self.current_ghost_timer <= 0:
-            self.spawn_ghosts()
-            self.current_ghost_timer = self.ghost_timer
-            
-        if action_performed:
-            self.current_ghost_timer -= 1
-            self.move_ghosts()
-
-    def spawn_ghosts(self):
+    # Gestion des fantômes
+    if current_ghost_timer <= 0:  # Le timer est arrivé à zéro
         debug_print("\n=== Ghost Spawn Cycle ===")
-        if len(self.ghost_spawn_positions) >= 2:
-            positions = random.sample(self.ghost_spawn_positions, 2)
+        debug_print(f"Current active ghosts: {len(fantomes)}")
+
+        # Création de deux nouveaux fantômes
+        if len(ghost_spawn_positions) >= 2:
+            positions = random.sample(ghost_spawn_positions, 2)
             for x, y, size in positions:
                 fantome = Fantome(x, y, size)
-                fantome.show()
+                fantome.show()  # Le rendre visible immédiatement
                 fantomes.append(fantome)
                 debug_print(f"Spawned new ghost #{fantome.id} at ({x}, {y})")
+
+        current_ghost_timer = timerfantome  # Réinitialise le timer
+        debug_print(f"Ghost timer reset to {timerfantome}")
+        debug_print(f"Global timer: {player.timer}")
         debug_print("=== End Spawn Cycle ===\n")
 
-    def move_ghosts(self):
+    # Décrémenter le timer des fantômes si une action est effectuée
+    if key and action_performed:
+        current_ghost_timer -= 1
+        debug_print(f"Ghost timer: {current_ghost_timer}")
+
+        # Déplacement des fantômes
         for fantome in fantomes:
             if fantome.visible:
                 fantome.has_moved = False
-                fantome.move(self.map_data)
+                fantome.move(map_data)
 
-    def run(self):
-        while self.running:
-            self.update()
+                fantome.move(map_data)
+    # Rafraîchit l'affichage
+    g.actualiser()
+    g.pause(0.05)  # Petit délai pour contrôler la vitesse du jeu
 
-
-# Modification de la boucle principale
-def main():
-    engine = GameEngine(g)
-    engine.run()
-    g.fermerFenetre()
-
-if __name__ == "__main__":
-    main()
+# fermeture fenêtre
+g.fermerFenetre()
