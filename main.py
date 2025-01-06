@@ -38,6 +38,7 @@ E = Prise ethernet (point de spawn des fantômes)
 P = Position initiale du joueur
 """
 
+
 class Block:
     """
     Classe de base pour tous les éléments statiques du jeu
