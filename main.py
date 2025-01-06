@@ -502,6 +502,24 @@ class Player:
                 return True
         return False
 
+    def level_up(self):
+        self.lvl += 1
+        debug_print(f"Player leveled up to level {self.lvl}")
+        
+        if self.lvl >= 4:  # Les bonus commencent au niveau 4
+            if self.lvl % 2 == 0:  # Niveau pair
+                self.bomb_range += 1
+                debug_print(f"Bomb range increased to {self.bomb_range}")
+            else:  # Niveau impair
+                self.lives += 1
+                debug_print(f"Lives increased to {self.lives}")
+
+    def check_score_level(self):
+        """Vérifie si le score permet de monter de niveau"""
+        required_score = (self.lvl + 1) * 10
+        if self.score >= required_score:
+            self.level_up()
+
 
 class Fantome:
 
@@ -749,6 +767,7 @@ while True:
         if action_performed:
             player.update_timer()
             player.check_ghost_collision()  # Vérifie les collisions après chaque mouvement
+            player.check_score_level()  # Vérifie si le score permet de monter de niveau
 
     # Gestion des bombes
     player.update_bombs(map_data)
@@ -783,6 +802,7 @@ while True:
                 fantome.has_moved = False
                 fantome.move(map_data)
 
+                fantome.move(map_data)
     # Rafraîchit l'affichage
     g.actualiser()
     g.pause(0.05)  # Petit délai pour contrôler la vitesse du jeu
