@@ -1,36 +1,45 @@
-# coding: utf-8
+"""
+BomberMan SAE - Jeu d'arcade style BomberMan
+Développé dans le cadre de la SAE 1.05
+
+Architecture du jeu:
+- Système de grille pour la carte
+- Gestion d'entités (joueur, fantômes, power-ups)
+- Moteur de jeu avec boucle principale
+- Système de collision et de destruction
+"""
+
 from tkiteasy import *
 import random
 import math
 
 # Configuration globale
-DEBUG_MODE = False  # Variable pour activer/désactiver les prints de debug
-
+DEBUG_MODE = False
 
 def debug_print(*args, **kwargs):
     if DEBUG_MODE:
         print(*args, **kwargs)
 
-
-# ouverture de fenêtre
+# Initialisation de la fenêtre et des variables globales
 L, H = 800, 800
 g = ouvrirFenetre(L, H)
-fantomes = []  # Liste globale des fantômes
-current_ghost_timer = 0  # Timer pour le spawn des fantômes
-powerups = []  # Liste globale des power-ups actifs
+fantomes = []  
+current_ghost_timer = 0
+powerups = []
 
-# un mur (M)
-# une colonne (C)
-# une prise ethernet (E)
-# Pour les cases vides
-# le bomberman (P)
-# un fantôme (F)
-# un upgrade (U)
-# une bombe (B)
-# une explosion (X)
-
+"""
+Légende des éléments de la carte:
+M = Mur (destructible)
+C = Colonne (indestructible) 
+E = Prise ethernet (point de spawn des fantômes)
+P = Position initiale du joueur
+"""
 
 class Block:
+    """
+    Classe de base pour tous les éléments statiques du jeu
+    Gère le rendu graphique des différents types de blocs
+    """
     def __init__(self, x, y, c):
         self.x = x
         self.y = y
@@ -133,6 +142,12 @@ class Block:
 
 
 class Bomb:
+    """
+    Système de bombes:
+    - Placement sur la grille
+    - Détonation temporisée
+    - Propagation de l'explosion
+    """
     def __init__(self, x, y, size, player):
         self.x = x
         self.y = y
@@ -198,6 +213,13 @@ class Bomb:
 
 
 class Explosion:
+    """
+    Gestion des explosions:
+    - Calcul de la propagation
+    - Destruction des murs
+    - Dégâts aux entités
+    - Animation en plusieurs phases
+    """
     def __init__(self, x, y, size, range, map_data, player=None):
         self.x = x
         self.y = y
@@ -373,6 +395,14 @@ class Explosion:
 
 
 class Player:
+    """
+    Mécanique du joueur:
+    - Déplacement sur la grille
+    - Placement de bombes
+    - Système de vie et de score
+    - Collection de power-ups
+    - Progression de niveau
+    """
     def __init__(self, x, y, size):
         self.x = x
         self.y = y
@@ -537,7 +567,13 @@ class Player:
 
 
 class Fantome:
-
+    """
+    Intelligence artificielle des fantômes:
+    - Déplacement aléatoire intelligent
+    - Évitement des obstacles et autres fantômes
+    - Comportement agressif à proximité du joueur
+    - Système de blocage et déblocage
+    """
     # Les fantômes se déplacent une case par tour sur des cases non bloquantes.
     # Si un Bomber est adjacent, le fantôme ne bouge pas (il attend pour attaquer).
     # Les déplacements respectent ces règles :
@@ -721,6 +757,12 @@ class Fantome:
 
 
 class PowerUp:
+    """
+    Système de power-ups:
+    - Apparition sur destruction des fantômes
+    - Types différents selon le niveau
+    - Application d'effets au joueur
+    """
     def __init__(self, x, y, size, type):
         self.x = x
         self.y = y
@@ -761,6 +803,12 @@ class PowerUp:
 
 
 def readmap():
+    """
+    Chargement et initialisation de la carte:
+    - Lecture du fichier de niveau
+    - Création des éléments statiques
+    - Placement du joueur et des fantômes initiaux
+    """
     players = []
     global fantomes, current_ghost_timer
     fantomes = []
@@ -822,6 +870,12 @@ player = players[0]  # Le premier joueur
 
 
 class InputHandler:
+    """
+    Gestion des entrées utilisateur:
+    - Touches directionnelles pour le mouvement
+    - Espace pour poser une bombe
+    - Échap pour quitter
+    """
     def __init__(self, game_window):
         self.game_window = game_window
 
@@ -849,6 +903,14 @@ class InputHandler:
 
 
 class GameEngine:
+    """
+    Moteur principal du jeu:
+    - Boucle de jeu
+    - Mise à jour des états
+    - Gestion des événements
+    - Spawn des fantômes
+    - Rendu graphique
+    """
     def __init__(self, game_window, map_file="map0.txt"):
         self.game_window = game_window
         self.input_handler = InputHandler(game_window)
@@ -921,6 +983,7 @@ class GameEngine:
 
 # Modification de la boucle principale
 def main():
+    """Point d'entrée principal du jeu"""
     engine = GameEngine(g)
     engine.run()
     g.fermerFenetre()
