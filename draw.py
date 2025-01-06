@@ -143,13 +143,38 @@ class Draw:
 
     @staticmethod
     def Ghost(g, x, y, size):
-        """Dessine le sprite d'un fantôme"""
-        return g.dessinerDisque(
-            x * size + size / 2,
-            y * size + size / 2,
-            size / 2,
-            "purple",
-        )
+        """Dessine le sprite d'un fantôme avec plus de détails et sans bugs"""
+        center_x = x * size + size / 2
+        center_y = y * size + size / 2
+
+        # Corps principal (forme de goutte inversée)
+        ghost_body = g.dessinerDisque(center_x, center_y, size / 2, "purple")
+
+        # Base ondulée (plusieurs segments)
+        wave_height = size / 6
+        wave_width = size / 4
+        base_y = center_y + size / 2
+
+        for i in range(5):
+            start_x = center_x - size / 2 + i * wave_width
+            end_x = start_x + wave_width
+            if i % 2 == 0:
+                g.dessinerLigne(start_x, base_y, end_x, base_y - wave_height, "purple")
+            else:
+                g.dessinerLigne(start_x, base_y - wave_height, end_x, base_y, "purple")
+
+        # Yeux
+        eye_radius = size / 8
+        eye_offset = size / 5
+        eye_y = center_y - size / 8
+
+        for dx in (-eye_offset, eye_offset):
+            # Blanc des yeux
+            g.dessinerDisque(center_x + dx, eye_y, eye_radius, "white")
+            # Pupilles
+            g.dessinerDisque(center_x + dx, eye_y, eye_radius / 2, "red")
+
+        return ghost_body
 
     @staticmethod
     def PowerUp(g, x, y, size, powerup_type):
