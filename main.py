@@ -12,6 +12,7 @@ Architecture du jeu:
 from tkiteasy import *
 import random
 import math
+from draw import Draw
 
 # Configuration globale
 DEBUG_MODE = False
@@ -37,7 +38,6 @@ E = Prise ethernet (point de spawn des fantômes)
 P = Position initiale du joueur
 """
 
-
 class Block:
     """
     Classe de base pour tous les éléments statiques du jeu
@@ -49,100 +49,21 @@ class Block:
         self.y = y
         self.c = c
 
+    @staticmethod
     def Colonne(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "DarkSlateGray")
-        g.dessinerLigne(x * c, y * c, x * c, y * c + c, "black")
-        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "black")
-        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "black")
-        g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "black")
-        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c, "black")
-        g.dessinerLigne(x * c, y * c, x * c + c, y * c + c, "black")
+        Draw.Colonne(g, x, y, c)
 
+    @staticmethod
     def Mur(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "firebrick")
-        g.dessinerLigne(x * c, y * c, x * c, y * c + c, "darkred")
-        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "darkred")
-        g.dessinerLigne(x * c, y * c + c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(x * c + c, y * c, x * c + c, y * c + c, "darkred")
-        g.dessinerLigne(
-            x * c + (c // 2),
-            y * c + (c // 3.5),
-            x * c + (c // 2),
-            y * c + (c // 2),
-            "darkred",
-        )
-        g.dessinerLigne(
-            x * c + (c // 2), y * c + (c // 1.3), x * c + (c // 2), y * c + c, "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5), y * c, x * c + (c // 3.5), y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3), y * c, x * c + (c // 1.3), y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 2),
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            "darkred",
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3),
-            y * c + (c // 2),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "darkred",
-        )
-        g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "darkred")
-        g.dessinerLigne(
-            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "darkred"
-        )
-        g.dessinerLigne(
-            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "darkred"
-        )
+        Draw.Mur(g, x, y, c)
 
+    @staticmethod
     def Sol(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "tan")
-        g.dessinerLigne(x * c, y * c, x * c + c, y * c, "brown")
-        g.dessinerLigne(x * c, y * c + (c // 2), x * c + c, y * c + (c // 2), "brown")
-        g.dessinerLigne(
-            x * c, y * c + (c // 1.3), x * c + c, y * c + (c // 1.3), "brown"
-        )
-        g.dessinerLigne(
-            x * c, y * c + (c // 3.5), x * c + c, y * c + (c // 3.5), "brown"
-        )
+        Draw.Sol(g, x, y, c)
 
+    @staticmethod
     def Ethernet(x, y, c):
-        g.dessinerRectangle(x * c, y * c, c, c, "BlanchedAlmond")
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 3.5),
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 1.3),
-            y * c + (c // 3.5),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 3.5),
-            x * c + (c // 1.3),
-            y * c + (c // 3.5),
-            "black",
-        )
-        g.dessinerLigne(
-            x * c + (c // 3.5),
-            y * c + (c // 1.3),
-            x * c + (c // 1.3),
-            y * c + (c // 1.3),
-            "black",
-        )
+        Draw.Ethernet(g, x, y, c)
 
 
 class Bomb:
@@ -170,23 +91,7 @@ class Bomb:
         self.draw()
 
     def draw(self):
-        # Position centrale de la bombe
-        center_x = self.x * self.size + self.size / 2
-        center_y = self.y * self.size + self.size / 2
-
-        # Dessine le corps de la bombe (cercle noir)
-        self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2.5, "black")
-
-        # Dessine la mèche de la bombe (petit rectangle blanc)
-        fuse_width = self.size / 6
-        fuse_height = self.size / 3
-        self.fuse_sprite = g.dessinerRectangle(
-            center_x - fuse_width / 2,
-            center_y - fuse_height,
-            fuse_width,
-            fuse_height,
-            "white",
-        )
+        self.sprite, self.fuse_sprite = Draw.Bomb(g, self.x, self.y, self.size)
 
     def explode(self, map_data):
         debug_print(f"Bomb exploding at ({self.x},{self.y})")
@@ -428,40 +333,9 @@ class Player:
         )
 
     def draw(self):
-        # Efface l'ancien sprite s'il existe
         if self.sprite:
             g.supprimer(self.sprite)
-
-        center_x = self.x * self.size + self.size / 2
-        center_y = self.y * self.size + self.size / 2
-
-        # Corps du joueur
-        self.sprite = g.dessinerDisque(center_x, center_y, self.size / 2, "Yellow")
-
-        # Yeux du joueur
-        eye_radius = self.size / 10
-        eye_offset = self.size / 6
-        for dx in (-eye_offset, eye_offset):
-            g.dessinerDisque(center_x + dx, center_y - eye_offset, eye_radius, "Black")
-
-        # Bouche du joueur
-        mouth_width = self.size / 3
-        mouth_height = self.size / 10
-        mouth_y = center_y + eye_offset
-        g.dessinerLigne(
-            center_x - mouth_width / 2,
-            mouth_y,
-            center_x,
-            mouth_y + mouth_height,
-            "Black",
-        )
-        g.dessinerLigne(
-            center_x,
-            mouth_y + mouth_height,
-            center_x + mouth_width / 2,
-            mouth_y,
-            "Black",
-        )
+        self.sprite = Draw.Player(g, self.x, self.y, self.size)
 
     def move(self, dx, dy, map_data):
         if self.can_move(dx, dy, map_data):
@@ -610,12 +484,7 @@ class Fantome:
         if self.sprite:
             g.supprimer(self.sprite)
         if self.visible:  # Dessine seulement si visible
-            self.sprite = g.dessinerDisque(
-                self.x * self.size + self.size / 2,
-                self.y * self.size + self.size / 2,
-                self.size / 2,
-                "purple",
-            )
+            self.sprite = Draw.Ghost(g, self.x, self.y, self.size)
             debug_print(f"Ghost #{self.id} drawn at ({self.x}, {self.y})")
 
     def hide(self):
@@ -786,18 +655,7 @@ class PowerUp:
         if self.sprite:
             g.supprimer(self.sprite)
 
-        # Couleurs selon le type de power-up
-        colors = {"range": "cyan", "life": "lime green"}
-        center_x = self.x * self.size + self.size / 2
-        center_y = self.y * self.size + self.size / 2
-        # Dessine un carré avec la couleur correspondante
-        self.sprite = g.dessinerRectangle(
-            center_x - self.size / 4,
-            center_y - self.size / 4,
-            self.size / 2,
-            self.size / 2,
-            colors[self.type],
-        )
+        self.sprite = Draw.PowerUp(g, self.x, self.y, self.size, self.type)
 
     def apply(self, player):
         debug_print(f"Applying powerup {self.type} to player")
