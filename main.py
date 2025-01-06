@@ -4,7 +4,7 @@ import random
 import math
 
 # Configuration globale
-DEBUG_MODE = False  # Variable pour activer/désactiver les prints de debug
+DEBUG_MODE = True  # Variable pour activer/désactiver les prints de debug
 
 def debug_print(*args, **kwargs):
     if DEBUG_MODE:
@@ -15,6 +15,7 @@ L, H = 800, 800
 g = ouvrirFenetre(L, H)
 fantomes = []  # Liste globale des fantômes
 current_ghost_timer = 0  # Timer pour le spawn des fantômes
+powerups = []  # Liste globale des power-ups actifs
 
 # un mur (M)
 # une colonne (C)
@@ -420,6 +421,14 @@ class Player:
             debug_print(f"Player moving from ({self.x},{self.y}) to ({self.x+dx},{self.y+dy})")
             self.x += dx
             self.y += dy
+            
+            # Check for powerups at new position
+            for powerup in list(powerups):  # Utiliser une copie de la liste
+                if int(powerup.x) == int(self.x) and int(powerup.y) == int(self.y):
+                    powerup.apply(self)
+                    powerups.remove(powerup)
+                    debug_print(f"Player collected powerup at ({self.x}, {self.y})")
+            
             # Redessine le sol à l'ancienne position
             Block.Sol(self.x - dx, self.y - dy, self.size)
             # Redessine le joueur à la nouvelle position
@@ -584,6 +593,16 @@ class Fantome:
                 and map_data[new_y][new_x] not in ["M", "C", "E"]
                 and (new_x, new_y) != self.last_pos
             ):
+                # Vérifie s'il y a un power-up à cette position
+                powerup_present = False
+                for powerup in powerups:
+                    if int(powerup.x) == new_x and int(powerup.y) == new_y:
+                        powerup_present = True
+                        debug_print(f"Ghost #{self.id} avoiding powerup at ({new_x}, {new_y})")
+                        break
+
+                if powerup_present:
+                    continue
 
                 # Vérifie si la case est occupée par un autre fantôme visible
                 occupied = False
@@ -669,10 +688,67 @@ class Fantome:
             g.supprimer(self.sprite)
             self.sprite = None
         self.visible = False
+        
+        # Création d'un power-up à l'emplacement du fantôme
+        if random.random() < 0.5:  # 50% de chance de drop
+            PowerUp(int(self.x), int(self.y), self.size)
+            debug_print(f"PowerUp spawned at ghost position ({self.x}, {self.y})")
+        
         try:
             fantomes.remove(self)
         except ValueError:
             debug_print(f"Ghost #{self.id} already removed")
+
+
+class PowerUp:
+    def __init__(self, x, y, size):
+        self.x = x
+        self.y = y
+        self.size = size
+        self.type = random.choice(['speed', 'bomb', 'range', 'life'])
+        self.sprite = None
+        powerups.append(self)  # Ajout à la liste globale
+        self.draw()
+        debug_print(f"PowerUp of type {self.type} created at ({x}, {y})")
+
+    def draw(self):
+        if self.sprite:
+            g.supprimer(self.sprite)
+            
+        # Couleurs selon le type de power-up
+        colors = {
+            'speed': 'blue',
+            'bomb': 'red',
+            'range': 'orange',
+            'life': 'green'
+        }
+        
+        center_x = self.x * self.size + self.size / 2
+        center_y = self.y * self.size + self.size / 2
+        
+        # Dessine un carré avec la couleur correspondante
+        self.sprite = g.dessinerRectangle(
+            center_x - self.size/4,
+            center_y - self.size/4,
+            self.size/2,
+            self.size/2,
+            colors[self.type]
+        )
+
+    def apply(self, player):
+        debug_print(f"Applying powerup {self.type} to player")
+        if self.type == 'speed':
+            player.speed += 0.2
+        elif self.type == 'bomb':
+            player.max_bombs += 1
+        elif self.type == 'range':
+            player.bomb_range += 1
+        elif self.type == 'life':
+            player.lives += 1
+        
+        if self.sprite:
+            g.supprimer(self.sprite)
+        powerups.remove(self)  # Retrait de la liste globale
 
 
 def readmap():
