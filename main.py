@@ -583,9 +583,13 @@ class Fantome:
         if moves:
             # Dessine le sol à l'ancienne position
             Block.Sol(int(self.x), int(self.y), self.size)
-            if self.updatestate == True:
-
-                self.updatestate = False
+            
+            # Redessine le power-up si nécessaire à l'ancienne position
+            for powerup in powerups:
+                if int(powerup.x) == int(self.x) and int(powerup.y) == int(self.y):
+                    powerup.draw()
+                    break
+            
             # Choisit un mouvement aléatoire
             dx, dy = random.choice(moves)
             old_pos = (self.x, self.y)
