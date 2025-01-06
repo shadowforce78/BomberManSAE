@@ -366,7 +366,8 @@ class Player:
         debug_print(f"Lives after: {self.lives}")
         if self.lives < 1:
             debug_print("Game Over triggered")
-            g.afficherTexte("Game Over", 200, 200, "red", 32)
+            g.dessinerRectangle(L//2-(L//6),H//2-(H//3),L//3,H//6,"red")
+            g.afficherTexte("Game Over!", L//2, H//2-(H//4), "black", 32)
             g.actualiser()
             g.attendreClic()
             g.fermerFenetre()
@@ -388,9 +389,9 @@ class Player:
         # Texte du HUD
         hud_text = f"Vies:{self.lives:3d} | Bombes:{self.max_bombs - len(self.active_bombs):2d} | Timer:{self.timer:4d} | Score:{self.score:5d} | Niveau:{self.lvl:2d}"
         # Dessine le fond du HUD
-        g.dessinerRectangle(0, 0, 800, 40, "black")
+        g.dessinerRectangle(0, 0, L, L//20, "black")
         # Affiche le texte du HUD
-        g.afficherTexte(hud_text, 400, 20, "white", 16)
+        g.afficherTexte(hud_text, L//2, L//40, "white", L//50)
 
     def update_bombs(self, map_data):
         if self.active_bombs:
@@ -409,11 +410,13 @@ class Player:
                 b for b in self.active_bombs if b not in bombs_to_remove
             ]
 
+
     def update_timer(self):
         self.timer -= 1
         if self.timer < 0:
             debug_print("Time's up!")
-            g.afficherTexte("Time's Up!", 200, 200, "red", 32)
+            g.dessinerRectangle(L//2-(L//6),H//2-(H//3),L//3,H//6,"white")
+            g.afficherTexte("Time's Up!", L//2, H//2-(H//4), "black", 32)
             g.actualiser()
             g.attendreClic()
             g.fermerFenetre()
