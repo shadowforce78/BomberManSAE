@@ -1,4 +1,5 @@
-# Bienvenue dans BomberMan
+# Bienvenue dans BomberMan 
+# SAE 1.01 - Initiation au dev
 ## Présentation
 BomberMan est un jeu de type Bomberman en 2D. Le but du jeu est de poser des bombes pour détruire les obstacles et les ennemis. Le joueur doit cepandant faire attention à ne pas se faire toucher par les explosions des bombes ou par les fantomes.
 
