@@ -16,14 +16,16 @@ import math
 # Configuration globale
 DEBUG_MODE = False
 
+
 def debug_print(*args, **kwargs):
     if DEBUG_MODE:
         print(*args, **kwargs)
 
+
 # Initialisation de la fenêtre et des variables globales
 L, H = 800, 800
 g = ouvrirFenetre(L, H)
-fantomes = []  
+fantomes = []
 current_ghost_timer = 0
 powerups = []
 
@@ -35,11 +37,13 @@ E = Prise ethernet (point de spawn des fantômes)
 P = Position initiale du joueur
 """
 
+
 class Block:
     """
     Classe de base pour tous les éléments statiques du jeu
     Gère le rendu graphique des différents types de blocs
     """
+
     def __init__(self, x, y, c):
         self.x = x
         self.y = y
@@ -148,6 +152,7 @@ class Bomb:
     - Détonation temporisée
     - Propagation de l'explosion
     """
+
     def __init__(self, x, y, size, player):
         self.x = x
         self.y = y
@@ -220,6 +225,7 @@ class Explosion:
     - Dégâts aux entités
     - Animation en plusieurs phases
     """
+
     def __init__(self, x, y, size, range, map_data, player=None):
         self.x = x
         self.y = y
@@ -403,6 +409,7 @@ class Player:
     - Collection de power-ups
     - Progression de niveau
     """
+
     def __init__(self, x, y, size):
         self.x = x
         self.y = y
@@ -574,6 +581,7 @@ class Fantome:
     - Comportement agressif à proximité du joueur
     - Système de blocage et déblocage
     """
+
     # Les fantômes se déplacent une case par tour sur des cases non bloquantes.
     # Si un Bomber est adjacent, le fantôme ne bouge pas (il attend pour attaquer).
     # Les déplacements respectent ces règles :
@@ -763,6 +771,7 @@ class PowerUp:
     - Types différents selon le niveau
     - Application d'effets au joueur
     """
+
     def __init__(self, x, y, size, type):
         self.x = x
         self.y = y
@@ -876,6 +885,7 @@ class InputHandler:
     - Espace pour poser une bombe
     - Échap pour quitter
     """
+
     def __init__(self, game_window):
         self.game_window = game_window
 
@@ -911,6 +921,7 @@ class GameEngine:
     - Spawn des fantômes
     - Rendu graphique
     """
+
     def __init__(self, game_window, map_file="map0.txt"):
         self.game_window = game_window
         self.input_handler = InputHandler(game_window)
